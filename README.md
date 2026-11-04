@@ -10,46 +10,62 @@
 </p>
 
 <p align="center"><b>Stop getting summaries. Start getting lessons.</b><br>
-<code>eureka</code> turns Claude into a professor who builds hard ideas from the ground up, with StatQuest-level step-by-step depth and 3Blue1Brown-style geometric intuition.</p>
+<code>eureka</code> turns Claude into a professor who builds hard ideas from the ground up, with StatQuest-level step-by-step depth and 3Blue1Brown-style visual intuition, and delivers them as interactive lessons, textbook PDFs, lecture slides or notebooks.</p>
+
+<p align="center">
+  <a href="https://mahdi13830510.github.io/eureka/showcase/derivatives/"><b>▶ Try the live interactive lesson: The Derivative</b></a>
+</p>
 
 ---
 
 ## The difference, in one question
 
-> **"Teach me the Muon optimizer. Why does it orthogonalize the update?"**
+> **"What is a derivative?"**
 
 **A typical AI answer:**
-> *Muon is an optimizer that orthogonalizes the momentum update using Newton–Schulz iterations, which approximates UVᵀ from the SVD. This improves conditioning and leads to faster training…*
+> *The derivative of a function measures the rate at which the function's output changes with respect to its input. It is defined as f′(x) = lim<sub>h→0</sub> (f(x+h) − f(x))/h and represents the slope of the tangent line.*
 
 Every word is true, and you've learned nothing.
 
-**With `eureka`**, Claude first maps the chain of ideas you need: weight matrix as a linear map → why gradients are sums of outer products → SVD as rotate–stretch–rotate → orthogonal matrices and the polar factor → why Gram–Schmidt gives a *different* answer → the spectral norm → steepest descent under a norm. Then it teaches each one, with derivations, worked numbers, and figures it renders and checks itself, before it lets them combine into Muon:
+**With `eureka`**, Claude starts from the *problem*: a falling stone has a speed at every instant, yet "distance ÷ time" over an instant is 0/0. Then it builds each idea you need:
+- average rate of change, as the slope of a secant you can drag;
+- shrinking the interval, as a live table that closes in on 19.6 m/s;
+- the algebra that makes the pattern certain, revealed one step at a time;
+- limits, as an ε–δ game;
+- the derivative itself;
+- "zoom in until the curve is straight";
+- x² as a growing square, whose corner vanishes;
+- the power rule;
+- where it all breaks, including why `h = 1e-15` gives garbage on a real computer.
+
+You get to play with each idea:
 
 <p align="center">
-  <img src="tests/sessions/round3-muon-visuals/02_svd_stages_G_vs_O.png" alt="SVD stages: G versus its orthogonalized version" width="90%">
-  <br><sub>Generated during a lesson: the same rotations with and without the stretch. That is what "orthogonalizing" means.</sub>
+  <img src="assets/preview-limit.png" alt="Slide h toward zero: the secant swings into the tangent" width="49%">
+  <img src="assets/preview-square.png" alt="x² as a growing square: the corner h² vanishes, leaving 2x" width="49%">
+  <br><sub>From the <a href="https://mahdi13830510.github.io/eureka/showcase/derivatives/">derivatives lesson</a>. Left: shrink h, and the secant becomes the tangent. Right: d(x²)/dx = 2x, seen as the strips of a growing square.</sub>
 </p>
 
 ## What it does
 
-- **Problem first.** Every lesson starts by making the *problem* understandable: what we want, why the obvious approach fails, what a solution must satisfy. The concept then arrives as the answer, so it feels like something you could have invented.
-- **Component by component.** Before writing, it maps every idea the topic depends on and teaches each one individually (problem → picture → mechanism → definition → derivation → example) before combining them. Nothing is name-dropped.
+- **Problem first.** Every lesson starts by making the *problem* understandable: what we want, why the obvious approach fails, what a solution must satisfy. The concept then arrives as the answer.
+- **Component by component.** It maps every idea the topic depends on and teaches each one individually (problem → picture → mechanism → definition → derivation → example) before combining them. Nothing is name-dropped.
 - **Every equation earned.** Each symbol is defined with its shape and units. The lesson says why the formula has *this* form and derives every step with its justification. No "after some algebra".
-- **Real visuals, not ASCII.** It writes and runs matplotlib plots, Manim animations, and Graphviz, Mermaid or Excalidraw diagrams, then looks at the output before referring to it. It never claims a figure exists when it doesn't.
-- **Honest.** No invented statistics, anecdotes or citations. Uncertain facts get checked. In paper mode it separates theorem, experiment, author claim, and its own interpretation.
-- **Depth over breadth.** Big topics are split into complete parts with a roadmap instead of being compressed into a summary.
-- **Sounds like a person at a whiteboard**, not an encyclopedia: connected reasoning, guiding questions, no bullet soup, no "let's dive in".
+- **Your format, made exceptional.** It asks how you want to learn and builds that:
 
-## Gallery: from a real lesson on FedMuon
+  | Format | What you get |
+  |---|---|
+  | 🌐 **Interactive HTML** | a course-quality page: live widgets, step-by-step derivations, KaTeX math, light and dark themes, works on phones |
+  | 📄 **PDF** | a typeset textbook chapter: numbered definitions, full derivations, figures, exercises |
+  | 🎞️ **Slides** | a complete lecture, one idea per slide, with progressive build-ups |
+  | 📓 **Jupyter notebook** | a computational lab: explanations, derivations, runnable experiments |
+  | 🧪 **Simulation** | a standalone tool to explore one concept deeply |
+  | 🎬 **Animation** | Manim or matplotlib animations of transformations unfolding |
+  | 💬 **Chat** | the full lesson inline, with figures |
 
-The prompt was *"explain me fedmuon"*. The skill found that two 2025 papers share the name, read both, and built Part 1 around a phenomenon it demonstrated by running simulations: **averaging normalized client updates turns a weighted average into a vote**.
-
-<p align="center">
-  <img src="showcase/fig1_mean_vs_median.png" alt="Averaged SGD finds the mean; averaged normalized steps find the median" width="49%">
-  <img src="showcase/fig2_geometric_median.png" alt="Normalized FedAvg converges to the geometric median" width="45%">
-</p>
-
-📖 **[Read the full lesson →](showcase/fedmuon-part1.md)**
+- **Verified, not just generated.** HTML lessons are loaded in a headless browser before you see them. It checks for JavaScript errors, broken math and widgets that don't respond, and looks at screenshots. PDFs and slides are rendered and inspected; notebooks are executed. Nothing is ever described as rendered when it wasn't.
+- **Honest.** No invented statistics, anecdotes or citations. In paper mode it separates theorem, experiment, author claim, and its own interpretation.
+- **Depth over breadth.** Big topics are split into complete parts with a roadmap instead of being compressed.
 
 ## Install
 
@@ -59,10 +75,10 @@ The prompt was *"explain me fedmuon"*. The skill found that two 2025 papers shar
 git clone https://github.com/mahdi13830510/eureka ~/.claude/skills/eureka
 ```
 
-Start a new session and just ask to learn something ("teach me Kalman filters"), or call it directly:
+Start a new session and ask to learn something, or call it directly:
 
 ```
-/eureka why does the transformer need positional encodings?
+/eureka teach me eigenvectors as an interactive lesson
 ```
 
 For a whole team, clone it into `<project>/.claude/skills/eureka/` and commit it.
@@ -76,6 +92,8 @@ For a whole team, clone it into `<project>/.claude/skills/eureka/` and commit it
 ### Claude API / Agent SDK
 
 Upload the folder through the Skills API, or place it in `.claude/skills/` for the Agent SDK. The format is the standard [Agent Skills](https://docs.claude.com/en/docs/agents-and-tools/agent-skills/overview) layout.
+
+**Optional tools** make richer formats possible: Chromium/Chrome (verifying HTML lessons), Typst or LaTeX/tectonic (PDF), Manim and ffmpeg (animations), Jupyter (notebooks). The skill checks what you have and adapts.
 
 ## Modes
 
@@ -94,26 +112,27 @@ These are chosen automatically from how you ask; you can also name one.
 
 ## Sample lessons
 
-All of these were written by fresh Claude instances that had only this skill (no extra prompting), and were then scored against a 13-criterion [rubric](tests/rubric.md).
+| Lesson | Format | Opens with |
+|---|---|---|
+| [**The Derivative**](https://mahdi13830510.github.io/eureka/showcase/derivatives/) ([source](showcase/derivatives/)) | interactive HTML | how can a stone have a speed at an instant, when distance ÷ time is 0/0? |
+| [Eigenvectors](tests/sessions/eigenvectors.md) | chat | a bike-share fleet settling into a 600/400 split |
+| [Bayesian probability](tests/sessions/bayesian-probability.md) | chat | a flaky CI test: did my commit break it? |
+| [Gradient descent](tests/sessions/gradient-descent.md) | chat | camera autofocus, then an exact step-size ceiling from curvature |
+| [Backpropagation](tests/sessions/backpropagation.md) | chat | the cost of nudging 79,510 weights one at a time |
+| [KL divergence](tests/sessions/round2-kl-divergence.md) | chat | grading a forecaster you can only sample |
+| [RSA](tests/sessions/round2-rsa.md) | chat | talking securely to a bank over café Wi-Fi |
+| [TCP congestion control](tests/sessions/tcp-congestion-control.md) | chat | an unknown bottleneck and the 1986 congestion collapse |
+| [A research paper: FedMuon](showcase/fedmuon-part1.md) | chat + figures | why averaging normalized updates finds a median, not the optimum |
 
-| Topic | Opens with |
-|---|---|
-| [FedMuon, Part 1](showcase/fedmuon-part1.md) | why FedAvg + normalized optimizers converge to a median instead of the optimum |
-| [Muon optimizer, Part 1](tests/sessions/round3-muon.md) | a weight matrix is a linear map, not a bag of numbers |
-| [Backpropagation](tests/sessions/backpropagation.md) | the cost of nudging 79,510 weights one at a time |
-| [Eigenvectors](tests/sessions/eigenvectors.md) | a bike-share fleet settling into a 600/400 split |
-| [Gradient descent](tests/sessions/gradient-descent.md) | camera autofocus, then an exact step-size ceiling from curvature |
-| [Bayesian probability](tests/sessions/bayesian-probability.md) | a flaky CI test: did my commit break it? |
-| [TCP congestion control](tests/sessions/tcp-congestion-control.md) | an unknown bottleneck and the 1986 congestion collapse |
-| [KL divergence](tests/sessions/round2-kl-divergence.md) | grading a forecaster you can only sample |
-| [RSA](tests/sessions/round2-rsa.md) | talking securely to a bank over café Wi-Fi |
+The chat lessons were written by fresh Claude instances that had only this skill, and were scored against a 13-criterion [rubric](tests/rubric.md).
 
 ## How it's built
 
 ```
 eureka/
-├── SKILL.md                     core method: problem → component map → teach each → assemble → mastery test
+├── SKILL.md                     core method: problem → format → component map → teach each → assemble → verify
 ├── references/                  loaded only when needed (progressive disclosure)
+│   ├── formats.md               HTML / PDF / slides / notebook / simulation / animation: standards and QA
 │   ├── voice.md                 sounding like a teacher; anti-compression rules
 │   ├── visuals.md               choosing, generating and verifying plots, animations, diagrams
 │   ├── math-teaching.md         component protocol, equation protocol, worked component chains
@@ -124,16 +143,18 @@ eureka/
 │   ├── implementation.md        theory → code that mirrors the math
 │   ├── assessment.md            checks, mistake repair, retrieval and spacing
 │   └── modes.md                 output shape for every mode
+├── templates/html-lesson/       design system + runtime (TOC, KaTeX, step-by-step derivations, SVG plotting, self-tests)
+├── scripts/check_html.py        headless-browser verification: JS errors, math, widget self-tests, overflow, screenshots
 ├── examples/                    style-calibration sessions
-├── showcase/                    a full lesson with its generated figures
+├── showcase/                    finished lessons
 └── tests/                       rubric, generated lessons, evaluation report
 ```
 
-The skill went through three rounds of testing with fresh Claude instances, and was revised each round from their output and their critiques of the instructions. The full record is in [`tests/evaluation.md`](tests/evaluation.md).
+The skill went through several rounds of testing with fresh Claude instances, and was revised each round from their output and their critiques of the instructions. The full record is in [`tests/evaluation.md`](tests/evaluation.md).
 
 ## Contributing
 
-Lessons that fall short are the most useful contribution. If `eureka` compresses, skips a step, or picks a bad example, [open an issue](https://github.com/mahdi13830510/eureka/issues) with the prompt and the part that went wrong. See [CONTRIBUTING.md](CONTRIBUTING.md).
+Lessons that fall short are the most useful contribution. If `eureka` compresses, skips a step, picks a bad example, or ships a broken widget, [open an issue](https://github.com/mahdi13830510/eureka/issues) with the prompt and the part that went wrong. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 If it helped you finally understand something, a ⭐ helps other people find it.
 
