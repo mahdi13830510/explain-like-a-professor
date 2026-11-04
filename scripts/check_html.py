@@ -9,6 +9,7 @@ at desktop (1280px) and narrow (~500px, the CLI minimum) widths. Saves screensho
 Exit code 0 = all checks passed. Needs only a Chromium/Chrome binary.
 """
 import glob, html, json, os, re, shutil, subprocess, sys, tempfile
+from html.parser import HTMLParser
 from pathlib import Path
 
 def find_browser():
@@ -21,9 +22,15 @@ def find_browser():
         if hits: return hits[-1]
     return None
 
+class _Refs(HTMLParser):
+    def __init__(self): super().__init__(); self.refs = []
+    def handle_starttag(self, tag, attrs):
+        for k, v in attrs:
+            if k in ("src", "href") and v and not v.startswith("#"): self.refs.append(v.split("#")[0])
+
 def local_refs(page: Path):
-    text = page.read_text(encoding="utf-8")
-    refs = re.findall(r'(?:src|href)=["\']([^"\'#]+)["\']', text)
+    parser = _Refs(); parser.feed(page.read_text(encoding="utf-8"))   # real attributes only, not text inside values
+    refs = [r for r in parser.refs if r]
     missing = []
     for r in refs:
         if re.match(r"^(https?:|data:|mailto:|//)", r): continue
@@ -67,7 +74,8 @@ def main():
         if not raw: print(f"FAIL  [{label}] self-tests did not run (is lesson.js loaded?)"); ok = False
         else:
             for t in json.loads(raw):
-                print(("ok   " if t["ok"] else "FAIL ") + f" [{label}] {t['name']}" + (f" ({t.get('error')})" if t.get("error") else ""))
+                tag = "ok   " if t["ok"] and not t.get("warn") else ("warn " if t["ok"] else "FAIL ")
+                print(tag + f" [{label}] {t['name']}" + (f" ({t.get('error') or t.get('warn')})" if t.get("error") or t.get("warn") else ""))
                 ok &= bool(t["ok"])
         shot = shots / f"{label}.png"
         run(browser, page.as_uri(), w, h * (3 if label == "desktop" else 4), [f"--screenshot={shot}"])
