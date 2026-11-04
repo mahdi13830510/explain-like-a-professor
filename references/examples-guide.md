@@ -1,6 +1,8 @@
 # Choosing Real Examples
 
-The example is not decoration; it is where the student first *meets* the concept. A good example lets them discover the idea; a bad one makes them translate an arbitrary story back into math.
+The example is not decoration. A good example lets the student discover the idea; a bad one makes them translate an arbitrary story back into math.
+
+**Real-world stories are optional.** Lessons start from the *actual problem* (see SKILL.md). Use a real-world situation only when it genuinely shows the mechanism better than the problem itself does, and never let it interrupt or replace the explanation of the concept. Often the best "real example" is mathematical or computational: a specific matrix, a specific dataset, a specific run of an algorithm, chosen because it exercises the interesting case.
 
 ## The mechanism test
 
