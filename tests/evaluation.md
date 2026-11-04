@@ -87,3 +87,27 @@ Issues found and fixed:
 - signpost counts conflicted between files (now one per major component);
 - the Manim-absent case was vague (now: static staged panels, optional unrendered source);
 - protocols were read as forms (now: a menu scaled to importance).
+
+## Round 4: multi-format learning materials
+
+The user asked for lessons as exceptional learning artifacts in a format they choose: interactive HTML, PDF, slides, Jupyter notebooks, simulations or animations. The rule is to ask unless the format was already specified, with no loss of teaching depth and real verification before delivery.
+
+Changes:
+- SKILL.md gains a format step (ask once, reuse the choice) and a build → verify → look → deliver procedure;
+- new `references/formats.md` sets per-format standards, toolchains and fallbacks, plus a QA checklist;
+- new `templates/html-lesson/` provides a design system and runtime: TOC with scrollspy, light/dark theme, KaTeX, step-by-step derivations, clipped SVG plotting helpers, draggable handles, and a self-test registry;
+- new `scripts/check_html.py` does headless-Chromium verification: JS errors, KaTeX errors, widget self-tests, overflow, and screenshots.
+
+Test: built `showcase/derivatives/` (The Derivative, Part 1) with the template.
+- First checker run: all automated checks passed (216 KaTeX expressions, 6 widget self-tests).
+- **Visual review of full-page screenshots then found real bugs the automated checks missed:**
+  - lines drawn outside plot frames (no clipping);
+  - tick labels misplaced when 0 is outside the axis range;
+  - overcrowded ticks on short plots;
+  - a label overlapping a line;
+  - a derivation row too narrow for its equation.
+- All of these were fixed in the template runtime (clip paths, axis-aware label placement, pixel-aware tick density) and CSS, then re-checked and re-inspected.
+
+Lesson learned and written into the skill: automated checks are necessary but not sufficient. The "look at the screenshots yourself" step is mandatory.
+
+Known limitation: headless Chromium's CLI can't go below 500px wide, so the "narrow" check is 500px, not a true phone width.
