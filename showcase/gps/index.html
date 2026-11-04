@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How GPS Knows Where You Are · eureka</title>
+<meta name="description" content="An interactive lesson: from timed radio signals to a position fix. Distances from time of flight, trilateration, the clock-error unknown, iterative solving, geometry, and relativity.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<link rel="stylesheet" href="styles.css">
+<script defer src="lesson.js"></script>
+<script defer src="widgets.js"></script>
+<style>
+  /* lesson-specific: the iteration table inside the solver widget */
+  .sol-table { overflow-x: auto; margin-top: 8px; }
+  .sol-table table { margin: 0; width: 100%; }
+  .controls-row input[type=radio] { accent-color: var(--accent); margin: 0; }
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<div class="topbar">
+  <span class="course">How things work · Satellite navigation</span><span class="spacer"></span>
+  <button class="icon-btn" id="theme-toggle" aria-label="Toggle dark mode">◐ Theme</button>
+</div>
+
+<div class="layout">
+  <nav class="toc" aria-label="Contents"><div class="toc-title">Contents</div><ol></ol></nav>
+
+  <main>
+    <header class="hero">
+      <div class="kicker">Navigation · A complete lesson</div>
+      <h1>How GPS Knows Where You Are</h1>
+      <p class="lede">Your phone has no compass pointing at its own coordinates and no map pin built in. All it can do is listen to faint radio voices from space, each saying only “I am here, and it is exactly this time.” From nothing more than that, it works out where it is to within a few metres.</p>
+      <p class="roadmap"><b>The path:</b> what a satellite actually broadcasts → turning a travel time into a distance → one distance is a circle, three pin you down → why the phone's cheap clock ruins this → the fix: treat the clock error as one more unknown, and solve by iteration → why the arrangement of satellites matters → why Einstein had to be built into the satellites → what still goes wrong in a city.
+      <br><b>Assumed:</b> distance = speed × time, Pythagoras, and the idea of solving equations for unknowns. The math stays light, but nothing is hand-waved.</p>
+    </header>
+
+    <h2 id="problem"><span class="num">1</span>The problem: a phone that knows nothing</h2>
+    <p>Switch on a phone in the middle of a field. It has no idea whether it is in Lisbon or Lagos. It cannot see landmarks, it has no odometer, and nothing inside it measures position directly. Yet within seconds a blue dot appears on the map, usually within a few metres of where you are actually standing. Where does that information come from?</p>
+    <p>Not from the satellites telling the phone where it is. The satellites have no idea the phone exists; they never receive anything from it. GPS is strictly one-way: the satellites broadcast, and any number of receivers listen. That is why a billion phones can use it at once without anything being overloaded, and also why the phone has to do <em>all</em> the work of turning those broadcasts into a position.</p>
+    <p>So the real question of this lesson is: <strong>if all you can do is listen, what could you possibly hear that tells you where you are?</strong> Every step below is the answer to some version of that question, and each one exposes the next problem to solve.</p>
+
+    <h2 id="broadcast"><span class="num">2</span>What a satellite actually says</h2>
+    <p>The Global Positioning System is a constellation run by the United States, designed around at least 24 operational satellites (in recent years there have usually been about 31). They orbit about 20,200 km above the ground, which is high enough that each one circles the Earth in just under 12 hours, moving at roughly 3.9 km/s. The orbits are arranged so that, from almost anywhere on Earth at any time, at least four satellites are above the horizon.</p>
+    <p>Each satellite continuously transmits a radio signal that carries, in effect, two pieces of information:</p>
+    <p><strong>“I am here.”</strong> The satellite broadcasts the parameters of its own orbit (called the <em>ephemeris</em>), precise enough that a receiver can calculate where the satellite was at any instant. Ground stations track every satellite and upload fresh orbit data regularly, so this is trustworthy.</p>
+    <p><strong>“It is exactly this time.”</strong> Each satellite carries atomic clocks, and the signal is built so that a receiver can tell precisely when each piece of it left the satellite. Every satellite's clock is monitored from the ground, and small corrections to it are broadcast too, so all the satellites effectively share one very accurate time scale, GPS time.</p>
+    <p>That's all. No satellite says “you are 21,000 km away from me” and none says anything about the receiver. The position must be <em>deduced</em>. The signal is also astonishingly faint by the time it reaches the ground, weaker than the background radio noise around it. A receiver finds it anyway because each satellite repeats a known pseudo-random code: the receiver slides its own copy of the code along in time until it lines up with what it hears, and the amount of sliding needed is what tells it <em>when</em> the signal arrived.</p>
+    <div class="block key"><span class="label">Key idea</span><p>A satellite gives you two facts: where it was, and when it sent the signal. You add a third: when the signal arrived. Everything GPS does is built from those three.</p></div>
+
+    <h2 id="tof"><span class="num">3</span>Time of flight becomes distance</h2>
+    <p>If you know when a signal left and when it arrived, you know how long it travelled. Radio waves travel at the speed of light, and the speed of light is not just measured to high accuracy; since 1983 it has been fixed by the definition of the metre at exactly</p>
+    <div class="eq">$$c = 299{,}792{,}458\ \text{m/s}.$$</div>
+    <p>So the most familiar formula in physics, distance = speed × time, turns a travel time $\Delta t$ into a distance:</p>
+    <div class="eq">$$d = c\,\Delta t.$$</div>
+    <p>Put in some numbers to get a feel for the scale. A satellite directly overhead is about 20,200 km away, so its signal takes $20{,}200{,}000 / 299{,}792{,}458 \approx 0.0674$ s, about <strong>67 milliseconds</strong>, to reach you. A satellite just on the horizon is further away, about 25,800 km, so its signal takes about 86 ms. Every GPS signal you ever receive has been in flight for somewhere in that range.</p>
+    <p>Now turn it around and ask the question that will haunt the rest of this lesson: how much distance does a tiny <em>timing</em> error cost? Light covers $299{,}792{,}458 \times 10^{-9} \approx 0.30$ m in one nanosecond. So:</p>
+    <table>
+      <thead><tr><th>timing error</th><th>distance error $= c \times$ error</th></tr></thead>
+      <tbody>
+        <tr><td>1 nanosecond (10⁻⁹ s)</td><td>≈ 30 cm</td></tr>
+        <tr><td>10 nanoseconds</td><td>≈ 3 m</td></tr>
+        <tr><td>1 microsecond (10⁻⁶ s)</td><td>≈ 300 m</td></tr>
+        <tr><td>1 millisecond (10⁻³ s)</td><td>≈ 300 km</td></tr>
+      </tbody>
+    </table>
+    <p>Notice how brutal that conversion rate is. To know a distance to within a few metres, you need to know the travel time to within about ten <em>billionths</em> of a second. Keep that number in mind; it is the root of the two biggest problems later on.</p>
+
+    <figure class="widget wide" id="w-tof">
+      <svg></svg>
+      <div class="controls-row">
+        <label>measured travel time <input type="range" id="tof-t" min="66" max="88" step="0.01" value="72"></label>
+        <span>Δt = <output class="readout" id="tof-tv"></output> ms</span>
+        <span>d = c·Δt = <output class="readout" id="tof-d"></output> km</span>
+        <button class="btn ghost" id="tof-play">▶ Send a signal</button>
+      </div>
+      <figcaption><b>Drag the travel time.</b> The Earth and the orbit are drawn to scale in a slice through the planet. The satellite (blue) is at 20,200 km altitude; the dashed circle is every point at distance $c\,\Delta t$ from it. Below about 67.4 ms the circle can't reach the ground at all; above about 86 ms the only places it touches are hidden behind the Earth's curve. In between, it crosses the surface at two points (orange) in this slice; in 3-D the sphere meets the surface in a whole ring. One measurement narrows your position down to a curve, not a point. Press “Send a signal” to watch the wavefront expand (slowed down about 50 times).</figcaption>
+    </figure>
+
+    <div class="block warn"><span class="label">Careful · what “knowing the time” means</span>
+      <p>The satellite stamps the <em>departure</em> time with its atomic clock. The <em>arrival</em> time can only be read from the clock inside the receiver. The formula $d = c\,\Delta t$ silently assumes those two clocks agree. Hold on to that assumption: section 5 is what happens when it is false, which, for a phone, it always is.</p></div>
+
+    <h2 id="trilateration"><span class="num">4</span>From distances to a position: trilateration</h2>
+    <p>Suppose for now that the clocks are perfect, so each satellite gives us a true distance. What does one distance tell us?</p>
+    <p>It tells us we are somewhere on the set of points at that distance from the satellite. To keep pictures readable, this section works in a flat, two-dimensional toy world: three radio transmitters at known positions spread over a region about 60 km across. In two dimensions, “all points at distance $d$ from a transmitter” is a <strong>circle</strong>. (In three dimensions it is a sphere; we'll come back to that.) The geometry is the same as with satellites; only the scale changes, and the numbers in the figures are illustrative.</p>
+    <p>One circle leaves infinitely many possibilities. Add a second transmitter and you must also be on its circle, so you are at a point where the two circles cross. Two circles generally cross at <strong>two</strong> points, mirror images across the line joining the transmitters. A third circle breaks the tie: only one of the two candidates is also at the right distance from the third transmitter. Finding a position from distances like this is called <strong>trilateration</strong>. (It's often mistakenly called triangulation, which means finding a position from measured <em>angles</em>; GPS never measures an angle.)</p>
+
+    <figure class="widget wide" id="w-tri">
+      <svg></svg>
+      <div class="controls-row">
+        <span>use</span>
+        <label><input type="radio" name="tri-n" value="1"> 1 transmitter</label>
+        <label><input type="radio" name="tri-n" value="2"> 2</label>
+        <label><input type="radio" name="tri-n" value="3" checked> 3</label>
+        <span>possible positions: <output class="readout" id="tri-count"></output></span>
+      </div>
+      <figcaption><b>Drag the phone (black ring) and the transmitters (A, B, C).</b> Each circle is centred on a transmitter, with radius equal to the measured distance to the phone. With one transmitter the phone could be anywhere on the circle. With two, the candidates (orange) are the two crossings. With three, exactly one point lies on all three circles, and it is where the phone is. Try lining up A, B and the phone, and watch the two crossings of A and B merge into one point that's very sensitive to small changes; section 7 is about exactly that.</figcaption>
+    </figure>
+
+    <p>How does a computer find the crossing point? Write the phone's unknown position as $p = (x, y)$ and transmitter $i$'s known position as $s_i = (x_i, y_i)$. Each measured distance $d_i$ gives one equation, straight from Pythagoras:</p>
+    <div class="eq">$$d_i = \lvert p - s_i \rvert = \sqrt{(x - x_i)^2 + (y - y_i)^2}, \qquad i = 1, 2, 3.$$</div>
+    <p>Two unknowns, $x$ and $y$; three equations. The square roots make the equations nonlinear (that's why two circles can cross twice), so there's no single neat formula like solving $2x = 6$. We'll see how a receiver actually solves this kind of system in section 6, because the next problem changes the equations first.</p>
+    <p><strong>In three dimensions</strong>, each distance puts you on a sphere. Two spheres meet in a circle; a third sphere cuts that circle at two points. With satellites, one of the two points is usually absurd (far out in space, or moving at an impossible speed), so in principle three satellites and perfect clocks would be enough. That “in principle” is about to collapse.</p>
+
+    <h2 id="clock"><span class="num">5</span>The clock problem</h2>
+    <p>Each GPS satellite carries atomic clocks (rubidium or caesium), and the ground segment measures their tiny remaining errors and broadcasts corrections. A phone cannot carry an atomic clock. It keeps time with a quartz crystal oscillator, the same technology as a wristwatch, and quartz is good at counting seconds but nowhere near good enough to time light. Its exact rate depends on temperature, age and manufacturing, and an error of around one part in a million is a realistic order of magnitude (an illustrative figure; it varies between devices). One part in a million means the phone's clock gains or loses about 1 microsecond every second, and from the table above, one microsecond is 300 metres.</p>
+    <p>Even setting the phone's clock from the mobile network doesn't come close: that is accurate to perhaps milliseconds, and a millisecond is 300 km. So the honest position is: <strong>the phone does not know the current time to anywhere near the accuracy GPS needs.</strong></p>
+    <p>Let's see exactly what that does to the measurements. Call the receiver's clock error $b$ (for <em>bias</em>): when true GPS time is $t$, the phone's clock reads $t + b$. The phone measures arrival on its own clock and subtracts the departure time stamped by the satellite:</p>
+
+    <div class="derivation" data-stepwise>
+      <div class="step"><div>$$\Delta t_i^{\text{measured}} = \big(t^{\text{arrive}}_i + b\big) - t^{\text{depart}}_i$$</div><div class="why">arrival is read on the phone's clock, which is off by $b$; departure comes from the satellite's (corrected) atomic clock</div></div>
+      <div class="step"><div>$$= \underbrace{\big(t^{\text{arrive}}_i - t^{\text{depart}}_i\big)}_{\text{true travel time}} + b$$</div><div class="why">regroup: the true flight time plus the clock error</div></div>
+      <div class="step"><div>$$\rho_i = c\,\Delta t_i^{\text{measured}} = c\,(\text{true travel time}) + c\,b$$</div><div class="why">multiply by $c$ to turn the time into a distance, as in section 3</div></div>
+      <div class="step"><div>$$\rho_i = \lvert p - s_i \rvert + c\,b$$</div><div class="why">$c \times$ true travel time is the true distance from the satellite at $s_i$ to the phone at $p$</div></div>
+    </div>
+
+    <div class="block def"><span class="label">Definition · pseudorange</span>
+      <p>The <strong>pseudorange</strong> to satellite $i$ is the distance the receiver computes from its own clock, $\rho_i = c \times (\text{arrival time on receiver clock} - \text{departure time})$. It equals the true range $\lvert p - s_i\rvert$ plus $c\,b$, where $p$ is the receiver's position, $s_i$ the satellite's position at departure, and $b$ the receiver's clock error in seconds. “Pseudo” because it is not the true distance, and the error is not random: <em>it is the same $c\,b$ for every satellite</em>, since all arrival times are read from the same faulty clock.</p></div>
+
+    <p>That last point is the hinge of the whole lesson. If $b$ is 10 µs, then every pseudorange is about 3 km too long, all by the same amount. Draw circles with those radii and they no longer meet at the phone. They all swell together and overlap in a little curved triangle, and no single point is on all three.</p>
+
+    <figure class="widget wide" id="w-clock">
+      <svg></svg>
+      <div class="controls-row">
+        <label>phone clock error b <input type="range" id="clk-b" min="-12" max="12" step="0.1" value="6"></label>
+        <span>b = <output for="clk-b"></output> µs</span>
+        <span>every range off by c·b = <output class="readout" id="clk-cb"></output> km</span>
+      </div>
+      <figcaption><b>Slide the clock error.</b> The dashed circles are the true distances, which meet at the phone. The solid circles are the pseudoranges, each inflated (or shrunk) by the <em>same</em> amount $c\,b$. At $b = 0$ they meet at the phone; for any other value they don't meet at all. A negative error (clock running behind) shrinks every circle, which can leave them not even touching. The toy world is about 60 km wide, so these few-microsecond errors give errors of kilometres.</figcaption>
+    </figure>
+
+    <p>So a naive receiver is stuck. It has three circles that don't intersect and no idea which way to correct them. But notice what the widget shows: the circles aren't wrong in random ways. They're all wrong by one shared number. That's the clue.</p>
+
+    <h3 id="cancel">The bias cancels in differences</h3>
+    <p>Before fixing the problem, it's worth seeing a neat consequence of “same error for everyone”. Subtract two pseudoranges:</p>
+    <div class="derivation" data-stepwise>
+      <div class="step"><div>$$\rho_1 - \rho_2 = \big(\lvert p - s_1\rvert + c\,b\big) - \big(\lvert p - s_2\rvert + c\,b\big)$$</div><div class="why">write out both pseudoranges</div></div>
+      <div class="step"><div>$$= \lvert p - s_1\rvert - \lvert p - s_2\rvert$$</div><div class="why">the $c\,b$ terms are identical, so they cancel exactly, whatever $b$ is</div></div>
+    </div>
+    <p>The difference of two pseudoranges is exactly the difference of the two <em>true</em> ranges. The bad clock has dropped out. Geometrically, “my distance to $s_1$ minus my distance to $s_2$ equals a known number” describes a hyperbola (a hyperboloid in 3-D), not a circle. With $n$ satellites you get $n-1$ independent differences, and each pins you to a hyperbola. In 2-D you need two differences to locate a point, so three transmitters; in 3-D you need three differences, so four satellites. Either way, giving up on knowing the clock costs exactly one extra measurement. The next section gets to the same count by a route that's easier to compute.</p>
+
+    <h2 id="fix"><span class="num">6</span>The fix: make the clock error an unknown</h2>
+    <p>Here is the idea that makes GPS work, and it's almost cheeky. We don't know $b$. We don't know $x$ or $y$ either. So stop treating $b$ as an annoying error and treat it as <strong>one more unknown to solve for</strong>, exactly like the coordinates. Every measurement is an equation:</p>
+    <div class="eq">$$\rho_i = \sqrt{(x - x_i)^2 + (y - y_i)^2} + c\,b, \qquad i = 1, 2, \dots$$</div>
+    <p>In the 2-D toy world there are now three unknowns, $(x, y, b)$, so we need three transmitters. In the real 3-D world the unknowns are $(x, y, z, b)$, four of them, and that is why a GPS receiver needs signals from <strong>at least four satellites</strong>. The fourth satellite is not there to make the position more precise; it is there to work out what time it is.</p>
+    <div class="block key"><span class="label">Key idea</span><p>A receiver doesn't need an accurate clock. It needs one more satellite. Solving for the clock error turns a cheap phone into a timing instrument as good as the satellites' atomic clocks, for as long as it keeps solving. As a side effect, GPS is one of the most widely used ways of distributing precise time, to phone networks and power grids among others.</p></div>
+
+    <h3 id="iterate">Solving it: guess, linearise, correct, repeat</h3>
+    <p>We still have a system of nonlinear equations (those square roots again). Receivers solve it the way you'd find your way in fog: start with a guess, see how wrong it is, take a step that should fix it, and repeat. The trick is that <em>near</em> the guess, the equations are almost linear, and linear equations are easy.</p>
+    <p>Take a guess $\hat p$ for the position and $\hat b$ for the clock error. From the guess we can <em>predict</em> what each pseudorange should be, $\hat\rho_i = \lvert \hat p - s_i\rvert + c\hat b$, and compare it with what we measured. The mismatch $r_i = \rho_i - \hat\rho_i$ is called the <strong>residual</strong>. Now ask: how would the predicted range change if we nudged the guess?</p>
+
+    <div class="derivation" data-stepwise>
+      <div class="step"><div>$$\lvert \hat p + \Delta p - s_i\rvert \approx \lvert \hat p - s_i\rvert + u_i \cdot \Delta p$$</div><div class="why">moving by a small step $\Delta p$ changes your distance from the satellite only by the part of the step that points along the line of sight; $u_i$ is the unit vector from $s_i$ towards $\hat p$, and $u_i \cdot \Delta p$ is that part (a sideways step barely changes the distance)</div></div>
+      <div class="step"><div>$$\rho_i \approx \lvert \hat p - s_i\rvert + u_i \cdot \Delta p + c\,(\hat b + \Delta b)$$</div><div class="why">substitute into the pseudorange equation, with the unknown clock error written as guess plus correction</div></div>
+      <div class="step"><div>$$r_i = \rho_i - \hat\rho_i \approx u_i \cdot \Delta p + c\,\Delta b$$</div><div class="why">subtract the predicted range $\hat\rho_i$: what's left is linear in the corrections $\Delta p$ and $\Delta b$</div></div>
+      <div class="step"><div>$$\begin{pmatrix} r_1 \\ r_2 \\ r_3 \end{pmatrix} = \begin{pmatrix} u_{1x} & u_{1y} & c \\ u_{2x} & u_{2y} & c \\ u_{3x} & u_{3y} & c \end{pmatrix} \begin{pmatrix} \Delta x \\ \Delta y \\ \Delta b \end{pmatrix}$$</div><div class="why">one row per transmitter: a system of three <em>linear</em> equations in three unknowns, solvable by ordinary elimination</div></div>
+      <div class="step"><div>$$\hat p \leftarrow \hat p + \Delta p, \qquad \hat b \leftarrow \hat b + \Delta b$$</div><div class="why">apply the corrections and repeat from the top; each pass the linear approximation is better, because the guess is closer</div></div>
+    </div>
+
+    <p>Notice the matrix's last column: every entry is the same $c$. That column is the clock error at work, adding the same amount to every range, exactly as in the pseudorange definition. The first columns are the directions to the transmitters, so the matrix is a portrait of the geometry. Section 7 shows that this geometry decides how well the system can be solved.</p>
+    <p>This procedure is called <em>Gauss–Newton</em> iteration (with more measurements than unknowns, each step is a least-squares fit, which a real receiver uses to average over all the satellites it can hear). It is the same idea as Newton's method for finding roots: replace a curve by its tangent line, jump to where the tangent says the answer is, repeat.</p>
+
+    <div class="block example"><span class="label">Worked example · three transmitters, a 10-microsecond clock error</span>
+      <p>Transmitters at A = (8, 34), B = (54, 36), C = (30, 4), in km. The phone is really at (34, 22), and its clock is 10 µs fast, so every pseudorange is $c \times 10\ \mu\text{s} = 2.998$ km too long. The true distances are 28.636, 24.413 and 18.439 km; the measured pseudoranges are 31.634, 27.411 and 21.437 km. The receiver knows only those, plus the transmitter positions.</p>
+      <p>Start by guessing the centre of the three transmitters, (30.67, 24.67), with $b = 0$. Then iterate:</p>
+      <table>
+        <thead><tr><th>step</th><th>guess $x$ (km)</th><th>guess $y$ (km)</th><th>guess $b$ (µs)</th><th>position error</th></tr></thead>
+        <tbody>
+          <tr><td>0</td><td>30.667</td><td>24.667</td><td>0.000</td><td>4.27 km</td></tr>
+          <tr><td>1</td><td>33.842</td><td>22.111</td><td>10.711</td><td>193 m</td></tr>
+          <tr><td>2</td><td>33.9996</td><td>22.0004</td><td>10.0019</td><td>0.57 m</td></tr>
+          <tr><td>3</td><td>34.0000</td><td>22.0000</td><td>10.0000</td><td>0.004 mm</td></tr>
+        </tbody>
+      </table>
+      <p>Three steps from a guess kilometres off to the exact answer, clock error included. Look at how the error shrinks: 4 km, 0.2 km, 0.0006 km. Each error is roughly proportional to the <em>square</em> of the one before, so the number of correct digits roughly doubles per step. That's the signature of Newton-style methods, and it's because the linear approximation's mistake shrinks with the square of the distance from the answer. A real receiver also has a great head start: once it has a fix, the previous one is an excellent first guess.</p></div>
+
+    <figure class="widget wide" id="w-solve">
+      <svg></svg>
+      <div class="controls-row">
+        <label>true clock error b <input type="range" id="sol-b" min="-12" max="12" step="0.1" value="10"></label>
+        <output for="sol-b"></output><span>µs</span>
+        <button class="btn" id="sol-run">Solve for clock error</button>
+        <button class="btn ghost" id="sol-step">One step</button>
+        <button class="btn ghost" id="sol-reset">Reset</button>
+      </div>
+      <div class="controls-row"><span id="sol-msg" class="readout"></span></div>
+      <figcaption><b>Press “Solve for clock error” and watch the iterations.</b> The orange cross is the receiver's current guess; the solid circles are the pseudoranges with the guessed clock error removed ($\rho_i - c\hat b$). As the guess for $b$ improves, the circles shrink (or grow) until all three meet, and they meet at the phone. The table under the plot records every step. Drag the phone or the transmitters, then solve again; with three transmitters that aren't nearly in a line, it converges in a handful of steps.</figcaption>
+    </figure>
+
+    <div class="block warn"><span class="label">Careful · exactly enough equations can have two answers</span>
+      <p>With exactly as many measurements as unknowns, these nonlinear equations can occasionally have two valid solutions, just as two circles cross twice. Which one the iteration finds depends on the starting guess. In practice receivers usually track more satellites than the minimum, and the extra equations rule the impostor out.</p></div>
+
+    <h2 id="dop"><span class="num">7</span>Geometry matters: dilution of precision</h2>
+    <p>So far the measurements were exact. Real pseudoranges carry small random errors: noise in the receiver, leftover atmospheric delays (section 9), residual satellite clock and orbit errors. If each range is off by a metre or so, is the position also off by a metre or so?</p>
+    <p>It depends on <em>where the satellites are</em>, and the trilateration widget already hinted why. When two circles cross at a wide angle, nudging one circle moves the crossing a little. When they cross at a shallow angle, nearly tangent, the same nudge slides the crossing a long way along the circles. Satellites spread all around the sky give wide crossing angles; satellites bunched in one direction give shallow ones.</p>
+    <p>The clock unknown makes clustering even worse. If every satellite is in roughly the same direction, then moving towards them shortens every range by about the same amount, and that looks almost exactly like a change in the clock error, which also changes every range by the same amount. The receiver can't tell “I moved” from “my clock is off”, so small noise produces big swings in both.</p>
+    <div class="block def"><span class="label">Definition · dilution of precision (DOP)</span>
+      <p>If each range measurement has random error with standard deviation $\sigma$ (independent, equal for all satellites), the position error has a spread of about $\text{DOP} \times \sigma$. The DOP is a pure number computed only from the directions to the satellites, which are the rows $(u_{ix}, u_{iy}, 1)$ of the same matrix as in section 6, with the clock column measured in distance units. Small DOP (near 1 to 2) means good geometry; a large DOP means range errors get magnified. For a 2-D position it's called horizontal DOP, or HDOP.</p></div>
+    <p>DOP is computed from the matrix $H$ whose rows are those direction vectors: $\text{HDOP} = \sqrt{Q_{xx} + Q_{yy}}$, where $Q = (H^{\mathsf T} H)^{-1}$. You don't need the formula to use the widget; it only says “how much does the least-squares solution amplify noise for this arrangement”. The widget checks it the honest way, by simulation.</p>
+
+    <figure class="widget wide" id="w-dop">
+      <svg></svg>
+      <div class="controls-row">
+        <button class="btn ghost" id="dop-spread">Spread out</button>
+        <button class="btn ghost" id="dop-cluster">Clustered</button>
+        <button class="btn ghost" id="dop-resample">New noise</button>
+        <label>range noise σ <input type="range" id="dop-sig" min="1" max="10" step="0.5" value="3"></label><output for="dop-sig"></output><span>m</span>
+      </div>
+      <div class="controls-row"><span>HDOP = <output class="readout" id="dop-h"></output></span><span>predicted spread ≈ HDOP·σ = <output class="readout" id="dop-pred"></output> m</span><span>measured RMS error = <output class="readout" id="dop-rms"></output> m</span></div>
+      <figcaption><b>Left:</b> four transmitters around the phone (drag them anywhere). <b>Right:</b> 300 position fixes, each solved from the same four ranges with fresh random noise added (σ metres per range), drawn as errors in metres around the true position; the ellipse encloses about 95% of them in theory. Press “Clustered” and watch the cloud explode into a long streak pointing along the direction of the transmitters, then “Spread out”. The noise is simulated (Gaussian), and the toy-world scale is illustrative.</figcaption>
+    </figure>
+
+    <p>Notice the shape of the cloud when the transmitters are clustered: it stretches <em>along</em> the direction towards them. That's the “moved, or clock off?” confusion made visible. There's a real-world version of this you may never have noticed: all GPS satellites you can see are <em>above</em> you; none is below the horizon. So vertical position is always somewhat confused with clock error, and GPS altitude is typically noticeably less accurate than horizontal position.</p>
+
+    <h2 id="relativity"><span class="num">8</span>Relativity: clocks in orbit tick at a different rate</h2>
+    <p>We've demanded nanosecond timing from the satellite clocks. Here's a problem that has nothing to do with engineering: a clock in orbit genuinely does not tick at the same rate as a clock on the ground, and two separate effects from Einstein's theories are responsible.</p>
+    <p><strong>Speed slows the satellite clock (special relativity).</strong> A clock moving relative to you ticks slower, by a fraction of about $v^2 / 2c^2$ when $v$ is much smaller than $c$. At about 3.9 km/s, that's a fraction of about $8 \times 10^{-11}$, which adds up to roughly <strong>7 microseconds lost per day</strong>.</p>
+    <p><strong>Weaker gravity speeds it up (general relativity).</strong> Clocks deeper in a gravitational field tick slower. The satellites are far up, where Earth's gravity is weaker than at the surface, so their clocks tick <em>faster</em> than ground clocks, by roughly <strong>45 microseconds per day</strong>.</p>
+    <p>The gravity effect wins. Net, a GPS satellite clock runs fast by about <strong>38 microseconds per day</strong> compared with a clock on the ground. Through our conversion rate, 38 µs × $c$ ≈ 11 km. That is the figure usually quoted: the error the drift represents, growing by about 11 km every day if nothing were done.</p>
+
+    <figure class="widget wide" id="w-rel">
+      <svg></svg>
+      <div class="controls-row">
+        <label>orbit altitude <input type="range" id="rel-h" min="200" max="40000" step="10" value="20200"></label>
+        <span><output class="readout" id="rel-hv"></output> km</span>
+      </div>
+      <div class="controls-row">
+        <span>gravity: <output class="readout" id="rel-gr"></output></span>
+        <span>speed: <output class="readout" id="rel-sr"></output></span>
+        <span>net: <output class="readout" id="rel-net"></output> µs/day</span>
+        <span>(≈ <output class="readout" id="rel-km"></output> km of range per day)</span>
+      </div>
+      <figcaption><b>Slide the altitude.</b> These curves are computed live from the two formulas, for a circular orbit around a spherical Earth, compared with a clock at the surface (Earth's rotation and orbit eccentricity are ignored; they change the GPS numbers only slightly). Low orbits move fast, so the speed effect wins and orbiting clocks run slow (the International Space Station, at about 400 km, falls in this region). Higher up, the gravity effect wins. The two cancel at about 3,200 km. GPS, at 20,200 km, sits firmly on the “runs fast” side.</figcaption>
+    </figure>
+
+    <div class="derivation" data-stepwise>
+      <div class="step"><div>$$\frac{\Delta f}{f}\Big|_{\text{gravity}} \approx \frac{GM}{c^2}\left(\frac{1}{R_E} - \frac{1}{r}\right)$$</div><div class="why">gravitational effect: proportional to the difference in gravitational potential $-GM/r$ between the surface (radius $R_E \approx 6{,}371$ km) and the orbit (radius $r$); $GM \approx 3.986 \times 10^{14}\ \text{m}^3/\text{s}^2$ for Earth</div></div>
+      <div class="step"><div>$$\frac{\Delta f}{f}\Big|_{\text{speed}} \approx -\frac{v^2}{2c^2} = -\frac{GM}{2 r c^2}$$</div><div class="why">special-relativistic slowing; for a circular orbit gravity supplies the centripetal force, $v^2/r = GM/r^2$, so $v^2 = GM/r$</div></div>
+      <div class="step"><div>$$r = 26{,}571\ \text{km}: \quad +5.29 \times 10^{-10} \;-\; 0.83 \times 10^{-10} = +4.46 \times 10^{-10}$$</div><div class="why">plug in GPS: $r = 6{,}371 + 20{,}200$ km</div></div>
+      <div class="step"><div>$$4.46 \times 10^{-10} \times 86{,}400\ \text{s} \approx 38.5\ \mu\text{s per day}$$</div><div class="why">multiply the fractional rate by the seconds in a day: about +45.7 from gravity and −7.2 from speed</div></div>
+    </div>
+
+    <p>The fix is beautifully simple, and it was built in from the start: before launch, each satellite's clock is set to tick slightly slow, by almost exactly this fraction (its nominal 10.23 MHz reference is offset to about 10.229 999 995 43 MHz), so that once in orbit it ticks at the ground rate. Because the real orbits are slightly elliptical, the satellite's altitude and speed vary a little around each orbit, and receivers apply a further small correction for that, computed from the broadcast orbit.</p>
+    <div class="block warn"><span class="label">Careful · what the “11 km per day” really means</span>
+      <p>It's the range-equivalent of the clock drift, and the standard way to show the size of the effect. But think back to section 6: an error that is the <em>same</em> on every satellite looks just like a receiver clock error, and the receiver would solve it away into $b$. So positions wouldn't literally walk off by 11 km a day. What would break is subtler and still fatal: GPS time would race away from time on the ground, the orbit predictions (which are tied to ground time) would go wrong, and the parts of the effect that differ between satellites wouldn't cancel. Relativity is not an optional correction for GPS.</p></div>
+
+    <h2 id="limits"><span class="num">9</span>What still goes wrong, and how phones cope</h2>
+    <p>With good clocks, relativity handled, and good geometry, why isn't GPS perfect? Because the formula $d = c\,\Delta t$ also assumes the signal travels in a straight line, at $c$, straight to you. Near the Earth, none of those is quite true.</p>
+    <p><strong>The ionosphere slows the signal.</strong> Between about 50 and 1,000 km up, the atmosphere contains a layer of charged particles that delays radio signals, by an amount that varies with the time of day, the season and solar activity. Uncorrected, it can add several metres to tens of metres to a range. Single-frequency receivers use a broadcast model that removes part of it. Better receivers listen on two frequencies: the ionosphere delays different frequencies by different amounts (the delay scales as $1/f^2$), so comparing them measures the delay directly and removes most of it. Many recent phones receive two frequency bands for exactly this reason.</p>
+    <p><strong>The lower atmosphere (troposphere)</strong> adds a smaller delay, about 2.4 m for a satellite straight overhead and more for satellites low on the horizon, whose signals cross more air. It's predictable enough to model well.</p>
+    <p><strong>Multipath: the signal bounces.</strong> Next to buildings, the signal can reach the antenna both directly and after reflecting off a wall. A reflection always travels further, so it makes the range look too long. When the direct path is blocked entirely, the receiver may lock onto a reflection only, and that range can be wrong by tens of metres.</p>
+    <p><strong>Urban canyons</strong> combine everything bad. Tall buildings block most of the sky, so the visible satellites are few and bunched overhead in a narrow strip: poor geometry, and a high DOP, from section 7. Many of the signals that do arrive are reflections. That's why your blue dot wanders across the street downtown, while under an open sky a smartphone's GPS is typically accurate to within about 5 metres (the figure the US government's gps.gov gives is 4.9 m).</p>
+    <p><strong>Assisted GPS (A-GPS).</strong> There's also a speed problem. The navigation message, which carries the orbit data, is sent at just 50 bits per second, so a receiver starting from nothing needs at least about 30 seconds of clean signal per satellite to collect it, and much longer to collect the full almanac. A phone shortcuts this: it downloads the orbit data over the mobile network or Wi-Fi, along with a rough position (from cell towers) and a rough time. Knowing roughly where it is and which satellites should be overhead, it only has to search a narrow range of codes and timings, so a first fix takes seconds instead of a minute or more. Phones also blend in other clues: Wi-Fi and cell positioning, motion sensors, and other satellite systems (Europe's Galileo, Russia's GLONASS, China's BeiDou), which use the same principles you've just learned. More satellites mean more equations and, usually, better geometry.</p>
+    <div class="block key"><span class="label">The whole idea in one breath</span><p>Each satellite says where it is and when it spoke; the delay tells you a distance, but measured on a bad clock, so every distance is off by the same unknown amount. Treat that amount as one more unknown, use one more satellite, and solve the equations by repeatedly linearising. How well that works depends on the geometry, and it only works at all because relativity was built into the satellites' clocks.</p></div>
+
+    <h2 id="check"><span class="num">✓</span>Check your understanding</h2>
+    <div class="check"><p><b>1. Compute.</b> A receiver's measurement of one signal's arrival time is off by 50 nanoseconds. Roughly how big is the resulting range error? And if the same 50 ns error affects <em>every</em> satellite equally, how big is the position error, assuming the receiver solves for its clock?</p>
+      <details><summary>Show answer</summary><p>$50 \times 10^{-9}\ \text{s} \times 3 \times 10^8\ \text{m/s} \approx 15$ m of range error. But if the same error is on every satellite, it's indistinguishable from a receiver clock error: it simply gets absorbed into the solved value of $b$, and the position is unaffected. Only errors that <em>differ</em> between satellites damage the position. This is why the common-error idea is so powerful.</p></details></div>
+    <div class="check"><p><b>2. Count.</b> A ship knows it is on the sea surface (so, treating the local sea as a flat plane, its height is known), but its receiver has a quartz clock. How many satellites does it need for a fix? Explain using unknowns and equations.</p>
+      <details><summary>Show answer</summary><p>Unknowns: two horizontal coordinates and the clock error, three in all (the height is known). Each satellite gives one pseudorange equation, so three satellites suffice. That's the 2-D toy world of this lesson. Real receivers do use a known altitude like this as a constraint when fewer than four satellites are visible.</p></details></div>
+    <div class="check"><p><b>3. Predict.</b> Four satellites are visible, all within a few degrees of each other low in the eastern sky. The receiver reports a position. Before computing anything, which direction do you expect its errors to be largest in, and why?</p>
+      <details><summary>Show answer</summary><p>Along the east–west direction (towards and away from the satellites). Moving towards them changes all four ranges by almost the same amount, which looks almost exactly like a change in clock error, so the receiver can barely separate “moved east” from “clock is off”. The DOP is large and the error cloud is a long streak pointing at the satellites, as in the clustered setting of the widget.</p></details></div>
+    <div class="check"><p><b>4. Explain the bug.</b> Someone argues: “Since the satellite clocks run 38 µs/day fast, GPS positions must drift 11 km per day unless the receiver corrects each day.” What's wrong with this argument, and what is right about it?</p>
+      <details><summary>Show answer</summary><p>Two things are wrong. First, the correction isn't done daily by receivers: the satellite clocks are built to tick slow by the right fraction before launch, so the drift never happens in the first place. Second, a drift common to all satellites would largely be absorbed into the receiver's clock solution rather than appear as position error. What's right: the effect is real and large (38 µs × $c$ ≈ 11 km), and without the correction GPS time and the orbit data would become inconsistent with ground time, which would break the system.</p></details></div>
+
+    <p class="roadmap"><b>Where to go next.</b> Everything here used code timing, good to a few metres. Survey-grade receivers reach centimetres by also measuring the phase of the radio carrier wave itself (wavelength about 19 cm) and by comparing with a nearby base station whose position is known, so that shared errors cancel in differences, the same trick as in section 5. That's a lesson of its own: differential GPS and carrier-phase positioning.</p>
+  </main>
+</div>
+<pre id="__errors"></pre><pre id="__selftest"></pre>
+</body>
+</html>
