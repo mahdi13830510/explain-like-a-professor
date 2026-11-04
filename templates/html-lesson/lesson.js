@@ -1,4 +1,4 @@
-/* eureka lesson runtime: navigation, math, step-by-step derivations, plotting helpers, self-tests.
+/* Explain Like a Professor lesson runtime: navigation, math, step-by-step derivations, plotting helpers, self-tests.
    Load AFTER KaTeX (optional) and BEFORE the lesson's own widget code. Exposes window.L. */
 (function () {
   "use strict";
@@ -12,7 +12,7 @@
   /* ---------- theme ---------- */
   const store = { get(k) { try { return localStorage.getItem(k); } catch (_) { return null; } },
                   set(k, v) { try { localStorage.setItem(k, v); } catch (_) {} } };
-  const saved = store.get("eureka-theme");
+  const saved = store.get("elap-theme");
   if (saved) document.documentElement.dataset.theme = saved;
   L.css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
   L.onTheme = [];
@@ -20,7 +20,7 @@
     const cur = document.documentElement.dataset.theme ||
       (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
     const next = cur === "dark" ? "light" : "dark";
-    document.documentElement.dataset.theme = next; store.set("eureka-theme", next);
+    document.documentElement.dataset.theme = next; store.set("elap-theme", next);
     L.onTheme.forEach((f) => f());
   }
 
