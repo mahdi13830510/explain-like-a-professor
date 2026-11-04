@@ -1,6 +1,6 @@
 # Showcase: FedMuon, Part 1 of 4
 
-> Prompt: *"explain me fedmuon"*. Produced with the `eureka` skill in Claude Code. Figures were generated and checked during the lesson by [`fedmuon-part1-figures.py`](fedmuon-part1-figures.py).
+> Prompt: *"explain me fedmuon"*. Produced with the `explain-like-a-professor` skill in Claude Code. Figures were generated and checked during the lesson by [`fedmuon-part1-figures.py`](fedmuon-part1-figures.py).
 
 ---
 
