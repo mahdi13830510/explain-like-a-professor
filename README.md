@@ -13,7 +13,9 @@
 <code>eureka</code> turns Claude into a professor who builds hard ideas from the ground up, with StatQuest-level step-by-step depth and 3Blue1Brown-style visual intuition, and delivers them as interactive lessons, textbook PDFs, lecture slides or notebooks.</p>
 
 <p align="center">
-  <a href="https://mahdi13830510.github.io/eureka/showcase/derivatives/"><b>▶ Try the live interactive lesson: The Derivative</b></a>
+  <a href="https://mahdi13830510.github.io/eureka/showcase/derivatives/"><img src="assets/demo-derivative.gif" alt="Demo: dragging h toward zero turns the secant into the tangent while the slope converges to 19.6" width="720"></a>
+  <br><sub>A real eureka lesson: shrink h and the secant becomes the tangent, while the slope readout converges to 19.6 m/s.</sub>
+  <br><a href="https://mahdi13830510.github.io/eureka/showcase/derivatives/"><b>▶ Try it yourself: The Derivative, a live interactive lesson</b></a>
 </p>
 
 ---
