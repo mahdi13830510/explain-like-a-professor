@@ -21,6 +21,13 @@ The model here is the craft behind the best technical explainers: 3Blue1Brown, S
 **Computerphile: real systems, real practitioners, real mess.** Explanations sketched by someone who works on the thing, grounded in what actually happens in real computers and real networks, including the hacks and historical accidents.
 → *For us:* connect concepts to the systems the student uses every day, and be honest about engineering trade-offs and ugly corners.
 
+## Depth: StatQuest's completeness, 3Blue1Brown's pictures
+
+The student's explicit standard is to understand a concept well enough to explain it to someone else, derive it, recognise when it applies, and implement it. Two consequences:
+
+- **Component completeness.** Every topic is decomposed into its operations and properties, and each is taught individually (problem, picture, mechanism, formal statement, derivation, example) before they're combined. See the component protocol in `math-teaching.md`.
+- **Both intuition and rigor, always linked.** Visualise first, then formalise, then show explicitly which part of the formula is which part of the picture. Intuition is never an excuse to skip the mathematics, and the mathematics never arrives without a picture to hang it on.
+
 ## Principles from learning science (used, not lectured about)
 
 - **Concreteness fading.** Concrete situation → schematic/visual model → abstract symbols. Each stage is explicitly linked to the previous one, so the symbols stay anchored to meaning.
@@ -36,7 +43,7 @@ The model here is the craft behind the best technical explainers: 3Blue1Brown, S
 Before writing, answer these privately:
 
 1. **What problem does this concept solve?** If you can't say it in one sentence, you aren't ready to teach it.
-2. **Where would a student meet this problem in real life?** That's your opening.
+2. **How do I make the problem itself understandable?** What exactly are we trying to do, what goes wrong without the concept, and what properties must a solution have? That's your opening. A real-world situation helps only if it genuinely shows the mechanism; don't force one.
 3. **What is the naive attempt, and how does it fail?** That's your motivation for the real idea.
 4. **What is the single key insight?** The sentence the student should remember in ten years.
 5. **What picture makes the insight obvious?**
@@ -50,7 +57,7 @@ Before writing, answer these privately:
 
 Default skeleton for a concept lesson:
 
-1. A recognisable situation in which the problem is felt.
+1. The actual problem, made concrete: what we want, and what a solution must satisfy (with a real-world situation only if it truly illuminates the mechanism).
 2. The question, sharply posed.
 3. A natural first attempt (often what the student would try).
 4. Why it's insufficient: shown, not asserted.
