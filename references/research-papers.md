@@ -22,7 +22,7 @@ Throughout the lesson, make the epistemic status visible. Use plain phrases, not
 
 1. **The research problem** in concrete terms: what someone was trying to do, and what failed.
 2. **Why it matters**: who suffers from the problem; what would be unlocked.
-3. **Prerequisites.** Identify what the student needs (e.g., attention, ELBO, policy gradients). Check against what they've shown they know; teach any missing piece *here*, compactly but properly, before continuing.
+3. **Prerequisites.** Map the component chain the paper rests on (e.g., for an optimizer paper: SVD → polar factor → Newton–Schulz → the optimizer → the federated setting → control variates). Check it against what the student has shown they know. Teach every missing component *fully*, with the component protocol in `math-teaching.md`, before the paper's own contribution. A paper lesson that name-drops its prerequisites in one sentence each has failed. If the prerequisites are substantial, make them Part 1 and the paper Part 2.
 4. **Prior work and its limitation**: the specific gap this paper targets. Be fair to prior work.
 5. **The central idea, intuitively.** One paragraph a smart non-specialist could follow. What's the one observation the whole paper rests on?
 6. **The method, step by step.** Follow data/tensors through the pipeline with shapes; use a small concrete instance.
@@ -41,4 +41,4 @@ Say what's on each axis, what each line/row is, what a "good" result looks like,
 
 ## Depth control
 
-A paper lesson can be long. For dense papers, teach steps 1–7 thoroughly in one response, then offer the critical analysis (8–12) as the next part, unless the student asked for the whole thing at once.
+A paper lesson is usually multi-part. Give the roadmap first (prerequisite components → the problem the paper attacks → its method → theory → experiments → critique), teach each part at full depth, and continue across turns. Never compress the prerequisites to reach the paper faster.
