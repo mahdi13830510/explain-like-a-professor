@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>eureka · a Claude skill that teaches like a great professor</title>
+<meta name="description" content="eureka turns Claude into a professor: problem-first, component-by-component lessons with every step derived, delivered as interactive lessons, PDFs, slides or notebooks.">
+<meta property="og:title" content="eureka: a Claude skill that teaches like a great professor">
+<meta property="og:description" content="Stop getting summaries. Start getting lessons. Interactive, step-by-step, every equation derived.">
+<meta property="og:image" content="https://mahdi13830510.github.io/eureka/assets/banner.png">
+<meta property="og:url" content="https://mahdi13830510.github.io/eureka/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://mahdi13830510.github.io/eureka/assets/banner.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400&family=Source+Serif+4:opsz,wght@8..60,400;8..60,700&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#0f1115; --surface:#171a21; --ink:#e8e6e3; --muted:#9aa0a6; --rule:#262a33; --accent:#f2b84b; --blue:#5aa9e6; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:18px/1.6 "Source Serif 4", Georgia, serif; }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 20px; }
+  header img { display:block; width:100%; height:auto; border-bottom:1px solid var(--rule); }
+  .lede { font-size: clamp(20px, 2.6vw, 26px); line-height:1.45; margin: 40px 0 8px; max-width: 34em; }
+  .sub { color: var(--muted); font: 16px/1.6 Inter, system-ui, sans-serif; max-width: 40em; }
+  .cta { display:flex; flex-wrap:wrap; gap:12px; margin: 28px 0 56px; font: 600 16px Inter, system-ui, sans-serif; }
+  .cta a { text-decoration:none; padding: 12px 18px; border-radius: 10px; }
+  .cta .primary { background: var(--accent); color: #1a1406; }
+  .cta .ghost { color: var(--ink); border: 1px solid var(--rule); }
+  .cta .ghost:hover { border-color: var(--muted); }
+  h2 { font: 700 28px/1.2 "Source Serif 4", Georgia, serif; margin: 64px 0 16px; }
+  .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 28px; font: 16px/1.55 Inter, system-ui, sans-serif; color: var(--muted); }
+  .grid b { display:block; color: var(--ink); font-size: 17px; margin-bottom: 4px; }
+  figure { margin: 0; }
+  .shots { display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+  .shots img { width:100%; height:auto; border-radius: 12px; border:1px solid var(--rule); display:block; }
+  figcaption { font: 14px/1.5 Inter, system-ui, sans-serif; color: var(--muted); margin-top: 8px; }
+  pre { font: 15px/1.5 "JetBrains Mono", ui-monospace, monospace; background: var(--surface); border:1px solid var(--rule); padding: 16px 18px; border-radius: 10px; overflow-x:auto; }
+  .formats { font: 16px/1.6 Inter, system-ui, sans-serif; color: var(--muted); }
+  .formats span { color: var(--ink); }
+  footer { margin: 80px 0 40px; padding-top: 20px; border-top: 1px solid var(--rule); font: 14px Inter, system-ui, sans-serif; color: var(--muted); }
+  a { color: var(--blue); }
+</style>
+</head>
+<body>
+<header><img src="assets/banner.png" alt="eureka: a Claude skill that teaches like a great professor" width="1280" height="640"></header>
+<main class="wrap">
+  <p class="lede"><b>Stop getting summaries. Start getting lessons.</b> eureka turns Claude into a professor who builds hard ideas from the ground up, with every component explained, every step derived, and every idea something you can play with.</p>
+  <p class="sub">An open-source skill for Claude Code and Claude.ai, inspired by the teaching of 3Blue1Brown and StatQuest (not affiliated).</p>
+  <div class="cta">
+    <a class="primary" href="showcase/derivatives/">▶ Try a live lesson: The Derivative</a>
+    <a class="ghost" href="https://github.com/mahdi13830510/eureka">★ Star on GitHub</a>
+    <a class="ghost" href="https://github.com/mahdi13830510/eureka/releases/latest">Download for Claude.ai</a>
+  </div>
+
+  <div class="shots">
+    <figure><a href="showcase/derivatives/#shrink"><img src="assets/preview-limit.png" alt="Shrink h and the secant becomes the tangent"></a><figcaption>Shrink h and watch the secant swing into the tangent, while the slope converges to 19.6.</figcaption></figure>
+    <figure><a href="showcase/derivatives/#square"><img src="assets/preview-square.png" alt="x squared as a growing square"></a><figcaption>Why d(x²)/dx = 2x: grow a square, and the corner vanishes.</figcaption></figure>
+  </div>
+
+  <h2>What makes it different</h2>
+  <div class="grid">
+    <div><b>Problem first</b>Every lesson makes the problem understandable before the solution, so the concept arrives as the answer you were looking for.</div>
+    <div><b>Component by component</b>It maps every idea a topic depends on and teaches each one fully before combining them. Nothing is name-dropped.</div>
+    <div><b>Every equation earned</b>Symbols defined, the form explained, every derivation step justified. No "after some algebra".</div>
+    <div><b>Verified, not just generated</b>Interactive lessons are tested in a headless browser and inspected from screenshots before you see them.</div>
+  </div>
+
+  <h2>Your format, made exceptional</h2>
+  <p class="formats"><span>Interactive HTML lessons</span> with live widgets · <span>PDF</span> textbook chapters · <span>slides</span> for lectures · <span>Jupyter notebooks</span> as computational labs · <span>simulations</span> · <span>animations</span> · or plain <span>chat</span>. eureka asks which you want.</p>
+
+  <h2>Install in one line</h2>
+  <pre>git clone https://github.com/mahdi13830510/eureka ~/.claude/skills/eureka</pre>
+  <p class="sub">Then, in Claude Code: <code>/eureka teach me eigenvectors as an interactive lesson</code>. For Claude.ai, upload <a href="https://github.com/mahdi13830510/eureka/releases/latest">eureka.zip</a> under Settings → Capabilities → Skills.</p>
+
+  <footer>MIT licensed · <a href="https://github.com/mahdi13830510/eureka">github.com/mahdi13830510/eureka</a> · Found a lesson that fell short? <a href="https://github.com/mahdi13830510/eureka/issues/new?template=lesson-fell-short.md">Tell us</a>.</footer>
+</main>
+</body>
+</html>
