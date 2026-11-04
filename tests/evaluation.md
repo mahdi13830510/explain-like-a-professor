@@ -46,3 +46,44 @@ Round 2 showed the revisions working: lessons got shorter and more focused, file
 ## Re-running
 
 See `rubric.md`. Use topics not mentioned anywhere in `SKILL.md`, `references/` or `examples/`, so the test measures generalization.
+
+## Round 3: depth-first revision
+
+The user asked for StatQuest-level step-by-step depth with 3Blue1Brown-style visuals:
+- start from the actual problem rather than a forced story;
+- teach every component individually;
+- no compression;
+- use real visual tools;
+- apply an explicit mastery test.
+
+Changes:
+- SKILL.md rewritten around problem-first openings, component mapping (Step 1), the per-component protocol (Step 2), assembly with the 7-step technique check (Step 3), splitting into parts instead of compressing, a real-visuals policy, and a mastery test;
+- new `references/visuals.md`;
+- the component protocol and two component chains (orthogonalization, SVD) added to `math-teaching.md`;
+- rubric criteria 11–13 added (component completeness, visuals that teach, mastery).
+
+Test: "Teach me the Muon optimizer… why it orthogonalizes the update and how Newton–Schulz does it" (fresh instance, held-out phrasing).
+
+| Lesson | Words (Part 1) | Visuals | Result |
+|---|---|---|---|
+| Muon, Part 1 of 3 | ~4,500 | 3 rendered and verified (spectrum plot from a real simulation, stage-by-stage SVD panels for G vs UVᵀ, Graphviz step diagram); Manim source labelled unrendered | Pass |
+
+What changed relative to round 1/2: components were each built rather than mentioned. These were:
+- the gradient as a sum of outer products (derived);
+- SVD existence (proved);
+- orthogonal matrices;
+- the polar factor;
+- Gram–Schmidt/QR shown to give a *different* answer (numbers);
+- spectral norm (derived);
+- steepest descent under three norms;
+- the full derivation of −ηUVᵀ;
+- the nearest-orthogonal-matrix property.
+
+Hand computations checked: G, UVᵀ, and the 3.0η vs 2.6η decrease table.
+
+Issues found and fixed:
+- the split deferred the student's explicit question (Newton–Schulz) entirely; there is now a rule to order parts by the student's question, explain any deferral, and allow a labelled preview;
+- the word guide was ambiguous (code blocks now excluded);
+- signpost counts conflicted between files (now one per major component);
+- the Manim-absent case was vague (now: static staged panels, optional unrendered source);
+- protocols were read as forms (now: a menu scaled to importance).
