@@ -48,6 +48,18 @@ You get to play with each idea:
   <br><sub>From the <a href="https://mahdi13830510.github.io/eureka/showcase/derivatives/">derivatives lesson</a>. Left: shrink h, and the secant becomes the tangent. Right: d(x²)/dx = 2x, seen as the strips of a growing square.</sub>
 </p>
 
+## Lessons you can open right now
+
+Each one was built with eureka, verified in a headless browser, and covers a different field.
+
+<table>
+<tr>
+<td width="33%" valign="top"><a href="https://mahdi13830510.github.io/eureka/showcase/derivatives/"><img src="assets/preview-square.png" alt="Derivative lesson"></a><br><b><a href="https://mahdi13830510.github.io/eureka/showcase/derivatives/">The Derivative</a></b><br><sub>Calculus. How can a stone have a speed at an instant? Secants, limits, and x² as a growing square.</sub></td>
+<td width="33%" valign="top"><a href="https://mahdi13830510.github.io/eureka/showcase/gps/"><img src="assets/preview-gps-1.png" alt="GPS lesson"></a><br><b><a href="https://mahdi13830510.github.io/eureka/showcase/gps/">How GPS Knows Where You Are</a></b><br><sub>Physics. Time of flight, trilateration, solving for your phone's clock error, and why relativity matters.</sub></td>
+<td width="33%" valign="top"><a href="https://mahdi13830510.github.io/eureka/showcase/compression/"><img src="assets/preview-zip-1.png" alt="Compression lesson"></a><br><b><a href="https://mahdi13830510.github.io/eureka/showcase/compression/">How ZIP Makes Files Smaller</a></b><br><sub>Computer science. Prefix codes, building a Huffman tree from your own text, entropy, and DEFLATE.</sub></td>
+</tr>
+</table>
+
 ## What it does
 
 - **Problem first.** Every lesson starts by making the *problem* understandable: what we want, why the obvious approach fails, what a solution must satisfy. The concept then arrives as the answer.
@@ -117,6 +129,8 @@ These are chosen automatically from how you ask; you can also name one.
 | Lesson | Format | Opens with |
 |---|---|---|
 | [**The Derivative**](https://mahdi13830510.github.io/eureka/showcase/derivatives/) ([source](showcase/derivatives/)) | interactive HTML | how can a stone have a speed at an instant, when distance ÷ time is 0/0? |
+| [**How GPS Knows Where You Are**](https://mahdi13830510.github.io/eureka/showcase/gps/) ([source](showcase/gps/)) | interactive HTML | a phone hears "I'm here, and it's exactly this time", and nothing else |
+| [**How ZIP Makes Files Smaller**](https://mahdi13830510.github.io/eureka/showcase/compression/) ([source](showcase/compression/)) | interactive HTML | why spend 8 bits on every letter, whether it's 'e' or 'z'? |
 | [Eigenvectors](tests/sessions/eigenvectors.md) | chat | a bike-share fleet settling into a 600/400 split |
 | [Bayesian probability](tests/sessions/bayesian-probability.md) | chat | a flaky CI test: did my commit break it? |
 | [Gradient descent](tests/sessions/gradient-descent.md) | chat | camera autofocus, then an exact step-size ceiling from curvature |
