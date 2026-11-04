@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify an eureka HTML lesson in a real headless browser.
+"""Verify an Explain Like a Professor HTML lesson in a real headless browser.
 
 Usage:  python3 check_html.py path/to/lesson/index.html [--shots OUTDIR]
 
@@ -38,7 +38,7 @@ def local_refs(page: Path):
     return missing
 
 def run(browser, url, width, height, extra):
-    prof = tempfile.mkdtemp(prefix="eureka-chk-")
+    prof = tempfile.mkdtemp(prefix="elap-chk-")
     cmd = [browser, "--headless=new", "--disable-gpu", "--hide-scrollbars", f"--user-data-dir={prof}",
            f"--window-size={width},{height}", "--virtual-time-budget=10000", *extra, url]
     try:
