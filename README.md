@@ -1,21 +1,21 @@
 <p align="center">
-  <img src="assets/banner.png" alt="eureka: a Claude skill that teaches like a great professor" width="100%">
+  <img src="assets/banner.png" alt="Explain Like a Professor: a Claude skill that teaches like a great professor" width="100%">
 </p>
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License"></a>
   <a href="https://docs.claude.com/en/docs/claude-code/skills"><img src="https://img.shields.io/badge/Claude%20Code-skill-d97757" alt="Claude Code skill"></a>
   <img src="https://img.shields.io/badge/Claude.ai-compatible-d97757" alt="Claude.ai compatible">
-  <a href="https://github.com/mahdi13830510/eureka/stargazers"><img src="https://img.shields.io/github/stars/mahdi13830510/eureka?style=social" alt="GitHub stars"></a>
+  <a href="https://github.com/mahdi13830510/explain-like-a-professor/stargazers"><img src="https://img.shields.io/github/stars/mahdi13830510/explain-like-a-professor?style=social" alt="GitHub stars"></a>
 </p>
 
-<p align="center"><b>Stop getting summaries. Start getting lessons.</b><br>
-<code>eureka</code> turns Claude into a professor who builds hard ideas from the ground up, with StatQuest-level step-by-step depth and 3Blue1Brown-style visual intuition, and delivers them as interactive lessons, textbook PDFs, lecture slides or notebooks.</p>
+<p align="center"><b>ELI5 makes it simpler. This makes you understand it.</b><br>
+<b>Explain Like a Professor</b> turns Claude into a professor who builds hard ideas from the ground up, with StatQuest-level step-by-step depth and 3Blue1Brown-style visual intuition, and delivers them as interactive lessons, textbook PDFs, lecture slides or notebooks.</p>
 
 <p align="center">
-  <a href="https://mahdi13830510.github.io/eureka/showcase/derivatives/"><img src="assets/demo-derivative.gif" alt="Demo: dragging h toward zero turns the secant into the tangent while the slope converges to 19.6" width="720"></a>
-  <br><sub>A real eureka lesson: shrink h and the secant becomes the tangent, while the slope readout converges to 19.6 m/s.</sub>
-  <br><a href="https://mahdi13830510.github.io/eureka/showcase/derivatives/"><b>▶ Try it yourself: The Derivative, a live interactive lesson</b></a>
+  <a href="https://mahdi13830510.github.io/explain-like-a-professor/showcase/derivatives/"><img src="assets/demo-derivative.gif" alt="Demo: dragging h toward zero turns the secant into the tangent while the slope converges to 19.6" width="720"></a>
+  <br><sub>A real Explain Like a Professor lesson: shrink h and the secant becomes the tangent, while the slope readout converges to 19.6 m/s.</sub>
+  <br><a href="https://mahdi13830510.github.io/explain-like-a-professor/showcase/derivatives/"><b>▶ Try it yourself: The Derivative, a live interactive lesson</b></a>
 </p>
 
 ---
@@ -29,7 +29,7 @@
 
 Every word is true, and you've learned nothing.
 
-**With `eureka`**, Claude starts from the *problem*: a falling stone has a speed at every instant, yet "distance ÷ time" over an instant is 0/0. Then it builds each idea you need:
+**With `explain-like-a-professor`**, Claude starts from the *problem*: a falling stone has a speed at every instant, yet "distance ÷ time" over an instant is 0/0. Then it builds each idea you need:
 - average rate of change, as the slope of a secant you can drag;
 - shrinking the interval, as a live table that closes in on 19.6 m/s;
 - the algebra that makes the pattern certain, revealed one step at a time;
@@ -45,18 +45,18 @@ You get to play with each idea:
 <p align="center">
   <img src="assets/preview-limit.png" alt="Slide h toward zero: the secant swings into the tangent" width="49%">
   <img src="assets/preview-square.png" alt="x² as a growing square: the corner h² vanishes, leaving 2x" width="49%">
-  <br><sub>From the <a href="https://mahdi13830510.github.io/eureka/showcase/derivatives/">derivatives lesson</a>. Left: shrink h, and the secant becomes the tangent. Right: d(x²)/dx = 2x, seen as the strips of a growing square.</sub>
+  <br><sub>From the <a href="https://mahdi13830510.github.io/explain-like-a-professor/showcase/derivatives/">derivatives lesson</a>. Left: shrink h, and the secant becomes the tangent. Right: d(x²)/dx = 2x, seen as the strips of a growing square.</sub>
 </p>
 
 ## Lessons you can open right now
 
-Each one was built with eureka, verified in a headless browser, and covers a different field.
+Each one was built with Explain Like a Professor, verified in a headless browser, and covers a different field.
 
 <table>
 <tr>
-<td width="33%" valign="top"><a href="https://mahdi13830510.github.io/eureka/showcase/derivatives/"><img src="assets/preview-square.png" alt="Derivative lesson"></a><br><b><a href="https://mahdi13830510.github.io/eureka/showcase/derivatives/">The Derivative</a></b><br><sub>Calculus. How can a stone have a speed at an instant? Secants, limits, and x² as a growing square.</sub></td>
-<td width="33%" valign="top"><a href="https://mahdi13830510.github.io/eureka/showcase/gps/"><img src="assets/preview-gps-1.png" alt="GPS lesson"></a><br><b><a href="https://mahdi13830510.github.io/eureka/showcase/gps/">How GPS Knows Where You Are</a></b><br><sub>Physics. Time of flight, trilateration, solving for your phone's clock error, and why relativity matters.</sub></td>
-<td width="33%" valign="top"><a href="https://mahdi13830510.github.io/eureka/showcase/compression/"><img src="assets/preview-zip-1.png" alt="Compression lesson"></a><br><b><a href="https://mahdi13830510.github.io/eureka/showcase/compression/">How ZIP Makes Files Smaller</a></b><br><sub>Computer science. Prefix codes, building a Huffman tree from your own text, entropy, and DEFLATE.</sub></td>
+<td width="33%" valign="top"><a href="https://mahdi13830510.github.io/explain-like-a-professor/showcase/derivatives/"><img src="assets/preview-square.png" alt="Derivative lesson"></a><br><b><a href="https://mahdi13830510.github.io/explain-like-a-professor/showcase/derivatives/">The Derivative</a></b><br><sub>Calculus. How can a stone have a speed at an instant? Secants, limits, and x² as a growing square.</sub></td>
+<td width="33%" valign="top"><a href="https://mahdi13830510.github.io/explain-like-a-professor/showcase/gps/"><img src="assets/preview-gps-1.png" alt="GPS lesson"></a><br><b><a href="https://mahdi13830510.github.io/explain-like-a-professor/showcase/gps/">How GPS Knows Where You Are</a></b><br><sub>Physics. Time of flight, trilateration, solving for your phone's clock error, and why relativity matters.</sub></td>
+<td width="33%" valign="top"><a href="https://mahdi13830510.github.io/explain-like-a-professor/showcase/compression/"><img src="assets/preview-zip-1.png" alt="Compression lesson"></a><br><b><a href="https://mahdi13830510.github.io/explain-like-a-professor/showcase/compression/">How ZIP Makes Files Smaller</a></b><br><sub>Computer science. Prefix codes, building a Huffman tree from your own text, entropy, and DEFLATE.</sub></td>
 </tr>
 </table>
 
@@ -88,27 +88,27 @@ Each one was built with eureka, verified in a headless browser, and covers a dif
 As a plugin (gets updates through `/plugin`):
 
 ```
-/plugin marketplace add mahdi13830510/eureka
-/plugin install eureka@eureka
+/plugin marketplace add mahdi13830510/explain-like-a-professor
+/plugin install explain-like-a-professor@explain-like-a-professor
 ```
 
 Or as a plain skill, in one line:
 
 ```bash
-git clone https://github.com/mahdi13830510/eureka ~/.claude/skills/eureka
+git clone https://github.com/mahdi13830510/explain-like-a-professor ~/.claude/skills/explain-like-a-professor
 ```
 
 Start a new session and ask to learn something, or call it directly:
 
 ```
-/eureka teach me eigenvectors as an interactive lesson
+/explain-like-a-professor teach me eigenvectors as an interactive lesson
 ```
 
-For a whole team, clone it into `<project>/.claude/skills/eureka/` and commit it.
+For a whole team, clone it into `<project>/.claude/skills/explain-like-a-professor/` and commit it.
 
 ### Claude.ai (web, desktop, mobile)
 
-1. Download `eureka.zip` from the [latest release](https://github.com/mahdi13830510/eureka/releases/latest).
+1. Download `explain-like-a-professor.zip` from the [latest release](https://github.com/mahdi13830510/explain-like-a-professor/releases/latest).
 2. **Settings → Capabilities**: turn on *Code execution and file creation*.
 3. **Settings → Capabilities → Skills → Upload skill**, and choose the zip.
 
@@ -137,9 +137,9 @@ These are chosen automatically from how you ask; you can also name one.
 
 | Lesson | Format | Opens with |
 |---|---|---|
-| [**The Derivative**](https://mahdi13830510.github.io/eureka/showcase/derivatives/) ([source](showcase/derivatives/)) | interactive HTML | how can a stone have a speed at an instant, when distance ÷ time is 0/0? |
-| [**How GPS Knows Where You Are**](https://mahdi13830510.github.io/eureka/showcase/gps/) ([source](showcase/gps/)) | interactive HTML | a phone hears "I'm here, and it's exactly this time", and nothing else |
-| [**How ZIP Makes Files Smaller**](https://mahdi13830510.github.io/eureka/showcase/compression/) ([source](showcase/compression/)) | interactive HTML | why spend 8 bits on every letter, whether it's 'e' or 'z'? |
+| [**The Derivative**](https://mahdi13830510.github.io/explain-like-a-professor/showcase/derivatives/) ([source](showcase/derivatives/)) | interactive HTML | how can a stone have a speed at an instant, when distance ÷ time is 0/0? |
+| [**How GPS Knows Where You Are**](https://mahdi13830510.github.io/explain-like-a-professor/showcase/gps/) ([source](showcase/gps/)) | interactive HTML | a phone hears "I'm here, and it's exactly this time", and nothing else |
+| [**How ZIP Makes Files Smaller**](https://mahdi13830510.github.io/explain-like-a-professor/showcase/compression/) ([source](showcase/compression/)) | interactive HTML | why spend 8 bits on every letter, whether it's 'e' or 'z'? |
 | [Eigenvectors](tests/sessions/eigenvectors.md) | chat | a bike-share fleet settling into a 600/400 split |
 | [Bayesian probability](tests/sessions/bayesian-probability.md) | chat | a flaky CI test: did my commit break it? |
 | [Gradient descent](tests/sessions/gradient-descent.md) | chat | camera autofocus, then an exact step-size ceiling from curvature |
@@ -154,7 +154,7 @@ The chat lessons were written by fresh Claude instances that had only this skill
 ## How it's built
 
 ```
-eureka/
+explain-like-a-professor/
 ├── SKILL.md                     core method: problem → format → component map → teach each → assemble → verify
 ├── references/                  loaded only when needed (progressive disclosure)
 │   ├── formats.md               HTML / PDF / slides / notebook / simulation / animation: standards and QA
@@ -179,7 +179,7 @@ The skill went through several rounds of testing with fresh Claude instances, an
 
 ## Contributing
 
-Lessons that fall short are the most useful contribution. If `eureka` compresses, skips a step, picks a bad example, or ships a broken widget, [open an issue](https://github.com/mahdi13830510/eureka/issues) with the prompt and the part that went wrong. See [CONTRIBUTING.md](CONTRIBUTING.md).
+Lessons that fall short are the most useful contribution. If `explain-like-a-professor` compresses, skips a step, picks a bad example, or ships a broken widget, [open an issue](https://github.com/mahdi13830510/explain-like-a-professor/issues) with the prompt and the part that went wrong. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 If it helped you finally understand something, a ⭐ helps other people find it.
 
