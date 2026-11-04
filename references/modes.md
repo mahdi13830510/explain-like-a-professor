@@ -4,11 +4,11 @@ The mode is chosen from the user's wording (see the table in SKILL.md). Modes ca
 
 ## Deep mode (default for "teach me / explain / help me understand")
 
-The full arc from SKILL.md: situation → conceptual model → formal foundations → derivation → worked example → applications → advanced understanding → a question to try. Flowing prose with equations woven in; derivations in their own blocks; a few short signposts at major turns in a long lesson, none in a short one. For big topics, teach the core arc completely, then sketch the advanced territory and offer to continue.
+The full arc from SKILL.md: the problem made understandable → components taught one by one (each with picture, mechanism, formal statement, derivation, example) → assembly → worked example connected to the general case → behaviour when inputs or assumptions change → common mistakes → applications and limits → a question to try. Split into parts across turns rather than compressing. Flowing prose with equations woven in; derivations in their own blocks; a few short signposts at major turns in a long lesson, none in a short one. For big topics, teach the core arc completely, then sketch the advanced territory and offer to continue.
 
 ## Intuitive mode
 
-Situation, mental model, pictures, consequences. Equations appear only if they *are* the intuition (e.g., "error shrinks like 1/√n" is intuition). Still precise: an intuitive explanation must not be wrong. Close with one sentence about what the formal treatment would add, and offer it.
+The problem, mental model, visuals, consequences. Equations appear only if they *are* the intuition (e.g., "error shrinks like 1/√n" is intuition). Still precise: an intuitive explanation must not be wrong. Close with one sentence about what the formal treatment would add, and offer it.
 
 ## Mathematical mode
 
