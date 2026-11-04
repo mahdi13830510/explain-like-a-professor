@@ -2,6 +2,57 @@
 
 The student wants to know how and why an equation was *constructed*, not to be shown a formula and have its parts labelled. A formula is the final, compressed form of an argument; the lesson is the argument.
 
+## Teaching in components
+
+Mathematical operations deserve their own explanations. A topic like "matrix orthogonalization" or "SVD" is a stack of operations and properties, and the student understands the topic only when they understand every layer. Mentioning a layer is not teaching it.
+
+### The component protocol
+
+For each component (an operation, a property, a decomposition, an algorithm step):
+
+1. **The problem**: what question forces this to exist? What can't we do without it?
+2. **The picture**: what it does to vectors, space, functions or data. Show it with a visual where one helps (`visuals.md`).
+3. **The mechanism**: how it works, step by step, in words.
+4. **The formal statement**: definition and notation; every symbol with meaning, type, shape, units.
+5. **The derivation**: why the formula is what it is, every meaningful step justified.
+6. **A small example**: computed in full, interpreted, then connected back to the general case.
+7. **Properties and edge cases**: what's always true, what can go wrong (zero vectors, rank deficiency, ill-conditioning).
+8. **The hand-off**: how this component is used by the next one in the chain.
+
+Short components (orthogonality of two vectors) may need only a paragraph and an example; long ones (QR) need the full treatment. What's not allowed is skipping a component the student lacks, or collapsing two different ones into one.
+
+### Component chains: two illustrations
+
+These show the *depth* expected. They're not fixed sequences; adapt the order to the topic and the student.
+
+**Matrix orthogonalization**
+1. Vectors as arrows and as lists; length.
+2. The inner product: algebraic definition, geometric meaning (|a||b|cos θ, derived from the law of cosines), what it measures (alignment).
+3. Orthogonality: inner product zero. Why it's useful: independent directions, no "double counting".
+4. Projection of b onto a: derive proj = (aᵀb / aᵀa)·a from "the residual must be orthogonal to a". Visual: the shadow.
+5. Removing a component: b − proj, and checking it really is orthogonal to a.
+6. Orthogonal vs orthonormal; why normalising is a *separate* step from orthogonalising (direction vs length).
+7. Gram–Schmidt, every step, on a real 3×3 example; why the order of vectors matters; why classical Gram–Schmidt loses orthogonality in floating point and modified Gram–Schmidt helps.
+8. Orthogonal matrices: QᵀQ = I, preserves lengths and angles, Q⁻¹ = Qᵀ, rotations and reflections.
+9. QR decomposition: Gram–Schmidt recorded as a factorisation; why R is upper triangular (each column only uses earlier directions); its uses (least squares without forming AᵀA); Householder as the stable way to compute it.
+10. Why we might want an orthogonal matrix *close to* a given matrix rather than any orthonormal basis of its column space. This is where QR stops being the right tool.
+11. SVD (as its own chain, below), then the polar decomposition A = (UVᵀ)(VΣVᵀ): an orthogonal factor times a stretch. The polar factor UVᵀ is the *nearest* orthogonal matrix to A in Frobenius norm. Contrast with Q from QR, which depends on column order and isn't nearest.
+12. Newton–Schulz: an iteration of matrix polynomials (only matmuls, GPU-friendly) that pushes every singular value toward 1, converging to UVᵀ; why it needs pre-scaling; how many iterations; what an inexact result means.
+13. Cost and stability comparison: Gram–Schmidt vs Householder QR vs SVD vs Newton–Schulz.
+
+**SVD**: don't open with A = UΣVᵀ.
+1. What a matrix does to space: the unit circle becomes an ellipse (visual).
+2. Special directions: which input directions land on the ellipse's axes?
+3. Singular values as the axis lengths, i.e. stretch factors.
+4. Right singular vectors (input directions) vs left singular vectors (output directions): why we need *two* sets, unlike eigenvectors (input and output spaces differ, even in dimension).
+5. The geometric decomposition: rotate (Vᵀ) → stretch (Σ) → rotate (U), animated stage by stage.
+6. The derivation: AᵀA is symmetric PSD, so the spectral theorem gives orthonormal eigenvectors V with eigenvalues σᵢ²; define uᵢ = Avᵢ/σᵢ and show they're orthonormal.
+7. Connection to eigendecomposition: when they coincide (symmetric PSD), when they differ.
+8. A worked 2×2 example by hand, then checked with `np.linalg.svd`.
+9. Uses: low-rank approximation (Eckart–Young), pseudoinverse, PCA, conditioning, and the polar factor. Limits: cost O(mn·min(m,n)), sign and rotation ambiguity of the singular vectors.
+
+The same standard applies to derivatives, gradients, Jacobians, Hessians, eigen-decompositions, norms, matrix multiplication, optimization, probability and estimators.
+
 ## The equation protocol
 
 For every equation that matters in a lesson:
@@ -9,14 +60,16 @@ For every equation that matters in a lesson:
 1. **Motivating problem.** What were we trying to compute or guarantee when we needed this?
 2. **Intuition first.** What should the answer *look like*? Which way should it move when an input changes? Sometimes have the student guess the form.
 3. **Define every symbol** at first use: what it means, its type (scalar, vector, matrix, function, random variable), its **shape** and its **units** when physical.
-4. **Why this structure?** Why a sum and not a product? Why squared? Why the minus sign? Why divide by n − 1? Every feature of a formula has a reason; give it.
-5. **Derive it** from things the student already accepts.
-6. **Name the rule** behind every transformation (chain rule, linearity of expectation, distributing the transpose, completing the square, the product rule, etc.).
-7. **Never skip algebra that a student could get stuck on.** "After some algebra" is banned. Trivial arithmetic can be combined; any step involving a rule, a substitution, or a cancellation gets its own line.
-8. **Numerical check** with meaningful numbers: plug in, compute, and interpret the result in the language of the original problem.
-9. **Sanity checks**: units balance, limiting cases (what if n → ∞? if the noise → 0?), symmetry, sign.
-10. **Assumptions and limits**: where does the derivation use independence, linearity, differentiability, convexity, small-angle approximation…? What breaks if it fails?
-11. **Connection** to where it's used.
+4. **Plain language.** Say what the whole equation claims in one ordinary sentence.
+5. **Why this structure?** Why a sum and not a product? Why squared? Why the minus sign? Why divide by n − 1? Every feature of a formula has a reason; give it. If the formula combines several operations (a transpose, a normalisation, a sum over an axis), explain the role of each one individually.
+6. **Derive it** from things the student already accepts.
+7. **Name the rule** behind every transformation (chain rule, linearity of expectation, distributing the transpose, completing the square, the product rule, etc.).
+8. **Never skip algebra that a student could get stuck on.** "After some algebra" and "after simplification" are banned when the simplification matters. Trivial arithmetic can be combined; any step involving a rule, a substitution, or a cancellation gets its own line.
+9. **Sensitivity.** What happens to the output when each input grows, shrinks, or hits zero? This is often the fastest route to intuition.
+10. **Numerical check** with meaningful numbers: plug in, compute, and interpret the result in the language of the original problem.
+11. **Sanity checks**: units balance, limiting cases (what if n → ∞? if the noise → 0?), symmetry, sign.
+12. **Assumptions and limits**: where does the derivation use independence, linearity, differentiability, convexity, small-angle approximation…? What breaks if it fails?
+13. **Connections**: to the previous components and to where it's used.
 
 ## Formatting derivations
 
