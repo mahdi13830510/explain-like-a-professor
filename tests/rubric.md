@@ -30,4 +30,4 @@ Also check: a worked example with realistic numbers that is computed fully and i
 
 ## How to re-run
 
-From Claude Code, for each prompt: start a fresh session (or a fresh subagent), let the `professor` skill load, give the prompt, save the response to `tests/sessions/<topic>.md`, and score it against this rubric. The subagent must not read `tests/`.
+From Claude Code, for each prompt: start a fresh session (or a fresh subagent), let the `eureka` skill load, give the prompt, save the response to `tests/sessions/<topic>.md`, and score it against this rubric. The subagent must not read `tests/`.
