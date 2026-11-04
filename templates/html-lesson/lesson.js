@@ -89,7 +89,8 @@
   L.el = (tag, attrs = {}, parent) => { const e = document.createElementNS(NS, tag);
     for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; };
   /** Create a 2-D plot in an <svg> with data coordinates. Returns helpers; call .layer() for redrawable groups. */
-  L.plot = (svg, { xmin, xmax, ymin, ymax, w = 720, h = 420, pad = 36, grid = true, equal = false }) => {
+  L.plot = (svg, { xmin, xmax, ymin, ymax, w = 720, h = 420, pad = 36, grid = true, equal = false, axes = true, ticks = "axis" }) => {
+    // axes: draw the x=0 / y=0 lines. ticks: "axis" (labels along the zero lines) | "edge" (bottom/left frame) | "none"
     svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
     if (equal) { const sx = (w - 2 * pad) / (xmax - xmin), sy = (h - 2 * pad) / (ymax - ymin);
       if (sx > sy) { const c = (xmin + xmax) / 2, half = (w - 2 * pad) / sy / 2; xmin = c - half; xmax = c + half; }
@@ -102,21 +103,21 @@
     // ~1 tick per 70 px horizontally, per 45 px vertically
     const step = (a, b, px) => { const r = (b - a) / Math.max(2, px), p = Math.pow(10, Math.floor(Math.log10(r))); const m = r / p; return (m < 1.5 ? 1 : m < 3.5 ? 2 : m < 7.5 ? 5 : 10) * p; };
     const zeroInY = ymin <= 0 && ymax >= 0, zeroInX = xmin <= 0 && xmax >= 0;
-    const xLabY = zeroInY ? Math.min(h - pad + 16, Y(0) + 16) : h - pad + 16;   // x labels: under the axis, else at the bottom edge
-    const yLabX = zeroInX ? Math.max(pad - 4, X(0) - 6) : pad - 6;               // y labels: left of the axis, else at the left edge
+    const xLabY = zeroInY && ticks === "axis" ? Math.min(h - pad + 16, Y(0) + 16) : h - pad + 16;   // x labels: under the axis, else at the bottom edge
+    const yLabX = zeroInX && ticks === "axis" ? Math.max(pad - 4, X(0) - 6) : pad - 6;               // y labels: left of the axis, else at the left edge
     if (grid) {
       const sx = step(xmin, xmax, (w - 2 * pad) / 70), sy = step(ymin, ymax, (h - 2 * pad) / 45);
       for (let x = Math.ceil(xmin / sx) * sx; x <= xmax + 1e-9; x += sx) {
         L.el("line", { x1: X(x), x2: X(x), y1: Y(ymin), y2: Y(ymax), class: "svg-grid" }, base);
-        if (Math.abs(x) > 1e-9 || !zeroInX) L.el("text", { x: X(x), y: xLabY, "text-anchor": "middle", class: "svg-tick" }, base).textContent = +x.toFixed(6);
+        if (ticks !== "none" && (Math.abs(x) > 1e-9 || !zeroInX || ticks === "edge")) L.el("text", { x: X(x), y: xLabY, "text-anchor": "middle", class: "svg-tick" }, base).textContent = +x.toFixed(6);
       }
       for (let y = Math.ceil(ymin / sy) * sy; y <= ymax + 1e-9; y += sy) {
         L.el("line", { x1: X(xmin), x2: X(xmax), y1: Y(y), y2: Y(y), class: "svg-grid" }, base);
-        if (Math.abs(y) > 1e-9 || !zeroInY) L.el("text", { x: yLabX, y: Y(y) + 4, "text-anchor": "end", class: "svg-tick" }, base).textContent = +y.toFixed(6);
+        if (ticks !== "none" && (Math.abs(y) > 1e-9 || !zeroInY || ticks === "edge")) L.el("text", { x: yLabX, y: Y(y) + 4, "text-anchor": "end", class: "svg-tick" }, base).textContent = +y.toFixed(6);
       }
     }
-    if (ymin <= 0 && ymax >= 0) L.el("line", { x1: X(xmin), x2: X(xmax), y1: Y(0), y2: Y(0), class: "svg-axis" }, base);
-    if (xmin <= 0 && xmax >= 0) L.el("line", { x1: X(0), x2: X(0), y1: Y(ymin), y2: Y(ymax), class: "svg-axis" }, base);
+    if (axes && ymin <= 0 && ymax >= 0) L.el("line", { x1: X(xmin), x2: X(xmax), y1: Y(0), y2: Y(0), class: "svg-axis" }, base);
+    if (axes && xmin <= 0 && xmax >= 0) L.el("line", { x1: X(0), x2: X(0), y1: Y(ymin), y2: Y(ymax), class: "svg-axis" }, base);
     // everything drawn in data coordinates is clipped to the plot frame
     const clipId = "clip" + Math.random().toString(36).slice(2, 9);
     const defs = svg.querySelector("defs") || L.el("defs", {}, svg);
