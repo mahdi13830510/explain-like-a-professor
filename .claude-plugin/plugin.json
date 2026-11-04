@@ -1,0 +1,11 @@
+{
+  "name": "eureka",
+  "displayName": "eureka",
+  "version": "1.1.0",
+  "description": "Teaches technical topics like a great professor: problem-first, component by component, every step derived, delivered as interactive HTML lessons, PDFs, slides, notebooks or chat.",
+  "author": { "name": "Mahdi Dolati", "url": "https://github.com/mahdi13830510" },
+  "homepage": "https://mahdi13830510.github.io/eureka/",
+  "repository": "https://github.com/mahdi13830510/eureka",
+  "license": "MIT",
+  "keywords": ["teaching", "education", "tutor", "learning", "math", "interactive", "lessons", "explainer"]
+}
