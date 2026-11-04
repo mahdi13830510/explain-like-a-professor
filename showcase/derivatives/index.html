@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Derivative · eureka</title>
+<meta name="description" content="An interactive lesson: from average speed to instantaneous change. Build the derivative from scratch, with live figures.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<link rel="stylesheet" href="styles.css">
+<script defer src="lesson.js"></script>
+<script defer src="widgets.js"></script>
+</head>
+<body>
+<div id="progress"></div>
+<div class="topbar">
+  <span class="course">Calculus from first principles · Part 1</span><span class="spacer"></span>
+  <button class="icon-btn" id="theme-toggle" aria-label="Toggle dark mode">◐ Theme</button>
+</div>
+
+<div class="layout">
+  <nav class="toc" aria-label="Contents"><div class="toc-title">Contents</div><ol></ol></nav>
+
+  <main>
+    <header class="hero">
+      <div class="kicker">Calculus · Part 1 of 3</div>
+      <h1>The Derivative</h1>
+      <p class="lede">Average speed is easy: distance divided by time. But what does it mean to have a speed <em>at one instant</em>, when no time passes and no distance is covered? Answering that question is the derivative.</p>
+      <p class="roadmap"><b>This part:</b> average rate of change → shrinking the interval → limits → the derivative → why zooming in makes curves straight → the derivative of x² seen as a growing square → the power rule → where it breaks, including on a real computer.
+      <br><b>Next parts:</b> the chain rule (Part 2), and derivatives in many dimensions: gradients (Part 3).
+      <br><b>Assumed:</b> algebra and graphs of functions. Nothing else.</p>
+    </header>
+
+    <h2 id="problem"><span class="num">1</span>The problem: speed at an instant</h2>
+    <p>Drop a stone from a bridge. Ignoring air resistance, physics says the distance it has fallen after $t$ seconds is</p>
+    $$s(t) = 4.9\,t^2 \quad \text{metres},$$
+    <p>where the 4.9 is half of Earth's gravitational acceleration, $g \approx 9.8\ \text{m/s}^2$. After 1 second it has fallen 4.9 m, after 2 seconds 19.6 m, after 3 seconds 44.1 m. Notice that the gaps grow: the stone covers more ground each second than the second before, because it's speeding up.</p>
+    <p>So here's the question: <strong>how fast is the stone moving at exactly $t = 2$ seconds?</strong></p>
+    <p>The only definition of speed we have is <em>distance ÷ time</em>. Try to apply it at a single instant, and both the distance and the time are zero: we get $0/0$, which is meaningless. A speedometer still shows a number at every instant, though, so there must be a sensible meaning. Making that meaning precise is the whole job of this lesson, and the tool we build, the derivative, measures how fast <em>anything</em> changes: temperature, a loss function, a population, a price.</p>
+
+    <h2 id="average"><span class="num">2</span>What we can compute: average rate of change</h2>
+    <p>Start with what does make sense. Between two times $t_1$ and $t_2$, the stone falls $s(t_2) - s(t_1)$ metres in $t_2 - t_1$ seconds, so its <em>average</em> speed over that interval is</p>
+    $$\text{average speed} = \frac{s(t_2) - s(t_1)}{t_2 - t_1} = \frac{\Delta s}{\Delta t}.$$
+    <p>The symbol $\Delta$ ("delta") just means "change in": $\Delta t$ is the elapsed time, $\Delta s$ the distance covered.</p>
+    <p>On a graph of distance against time, this number has a picture. Mark the two points $(t_1, s(t_1))$ and $(t_2, s(t_2))$ on the curve and join them with a straight line. That line rises $\Delta s$ while it runs $\Delta t$, so its <strong>slope</strong> (rise over run) <em>is</em> the average speed. A line through two points of a curve is called a <strong>secant line</strong>.</p>
+
+    <figure class="widget wide" id="w-secant">
+      <svg></svg>
+      <div class="controls-row"><span>Δt = <output class="readout" id="sec-dt"></output> s</span><span>Δs = <output class="readout" id="sec-ds"></output> m</span><span>slope = average speed = <output class="readout" id="sec-m"></output> m/s</span></div>
+      <figcaption><b>Drag the two points along the curve.</b> The secant's slope is the average speed between them. Notice that intervals later in the fall give steeper secants, because the stone is speeding up. Then try bringing the points close together around $t = 2$.</figcaption>
+    </figure>
+
+    <div class="block def"><span class="label">Definition · average rate of change</span>
+      <p>For a function $f$ and two inputs $a$ and $a+h$ with $h \neq 0$, the average rate of change of $f$ over that interval is
+      $$\frac{f(a+h) - f(a)}{h}.$$
+      Here $a$ is where the interval starts, $h$ is its length (the run), and the numerator is the change in output (the rise). This expression is called the <em>difference quotient</em>, and it is the slope of the secant line through $(a, f(a))$ and $(a+h, f(a+h))$.</p></div>
+    <p>We've written the interval as "from $a$ to $a + h$" rather than "from $t_1$ to $t_2$" because it lets us talk about the interval's <em>length</em> $h$ directly. In a moment, $h$ is what we'll shrink.</p>
+
+    <h2 id="shrink"><span class="num">3</span>Shrinking the interval</h2>
+    <p>Average speed over a long interval blurs together moments when the stone was slow and moments when it was fast. To get closer to the speed <em>at</em> $t = 2$, average over shorter and shorter intervals starting there. Let's compute. With $a = 2$:</p>
+    <table>
+      <thead><tr><th>interval length $h$ (s)</th><th>$s(2+h) - s(2)$ (m)</th><th>average speed (m/s)</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>24.5</td><td>24.5</td></tr>
+        <tr><td>0.5</td><td>11.025</td><td>22.05</td></tr>
+        <tr><td>0.1</td><td>2.009</td><td>20.09</td></tr>
+        <tr><td>0.01</td><td>0.19649</td><td>19.649</td></tr>
+        <tr><td>0.001</td><td>0.0196049</td><td>19.6049</td></tr>
+      </tbody>
+    </table>
+    <p>The averages are settling down. Each time $h$ shrinks tenfold, the excess over 19.6 also shrinks tenfold: 0.49, then 0.049, then 0.0049. Everything points at <strong>19.6 m/s</strong>. Watch it happen geometrically:</p>
+
+    <figure class="widget wide" id="w-limit">
+      <svg></svg>
+      <div class="controls-row">
+        <label>interval length h <input type="range" id="lim-h" min="-3" max="0.2" step="0.01" value="0"></label>
+        <span>h = <output class="readout" id="lim-hv"></output> s</span>
+        <span>secant slope = <output class="readout" id="lim-m"></output> m/s</span>
+      </div>
+      <figcaption><b>Slide h toward zero.</b> The second point slides down the curve into the first, and the secant (orange) swings into the dashed line that just touches the curve at $t = 2$, the <em>tangent line</em>. The slope readout converges to 19.6. The slider uses a logarithmic scale so you can reach tiny intervals.</figcaption>
+    </figure>
+
+    <h3 id="why-exact">Why exactly 19.6? Algebra makes the pattern certain</h3>
+    <p>A table can suggest a value; it can't prove one. So compute the difference quotient for a <em>general</em> $h$, keeping $h$ as a symbol. Click through one step at a time:</p>
+    <div class="derivation" data-stepwise>
+      <div class="step"><div>$$\frac{s(2+h) - s(2)}{h} = \frac{4.9(2+h)^2 - 4.9\cdot 2^2}{h}$$</div><div class="why">substitute $s(t) = 4.9t^2$ at $t = 2+h$ and $t = 2$</div></div>
+      <div class="step"><div>$$= \frac{4.9\,(4 + 4h + h^2) - 4.9\cdot 4}{h}$$</div><div class="why">expand $(2+h)^2 = 4 + 2\cdot 2\cdot h + h^2$</div></div>
+      <div class="step"><div>$$= \frac{4.9\,(4h + h^2)}{h}$$</div><div class="why">the $4.9 \cdot 4$ terms cancel: the starting distance drops out</div></div>
+      <div class="step"><div>$$= 4.9\,(4 + h)$$</div><div class="why">divide top and bottom by $h$, which is allowed <em>because $h \neq 0$</em></div></div>
+      <div class="step"><div>$$= 19.6 + 4.9\,h$$</div><div class="why">distribute: this is exactly the pattern in the table (excess $= 4.9h$)</div></div>
+    </div>
+    <p>Now the mystery dissolves. The average speed over an interval of length $h$ is <em>exactly</em> $19.6 + 4.9h$. The extra $4.9h$ is the bias caused by the stone speeding up during the interval, and it disappears as the interval does. There is precisely one number that $19.6 + 4.9h$ approaches as $h$ approaches 0: <strong>19.6</strong>.</p>
+    <div class="block warn"><span class="label">Careful · the step everyone gets wrong</span>
+      <p>We never set $h = 0$ in the original fraction; that gives $0/0$. We simplified <em>while $h$ was still nonzero</em>, which made the troublesome $h$ in the denominator cancel. Only then did we ask what happens as $h$ shrinks. That order is the whole trick, and it's why the next idea, the limit, is phrased the way it is.</p></div>
+
+    <h2 id="limit"><span class="num">4</span>Limits: approaching without arriving</h2>
+    <p>We need language for "the value that $19.6 + 4.9h$ heads toward as $h$ gets close to 0, without $h$ ever being 0." That is a <strong>limit</strong>.</p>
+    <div class="block def"><span class="label">Definition · limit (working version)</span>
+      <p>We write $\displaystyle\lim_{h \to 0} g(h) = L$ if $g(h)$ can be made as close to $L$ as we like by taking $h$ close enough to 0, but not equal to 0.</p>
+      <p>Precisely: for every tolerance $\varepsilon > 0$ there is a distance $\delta > 0$ such that whenever $0 < |h| < \delta$, we have $|g(h) - L| < \varepsilon$.</p></div>
+    <p>Read the precise version as a challenge game. You name any tolerance $\varepsilon$, however tiny ("get within 0.0001 of 19.6"). I must answer with a $\delta$ such that every $h$ within $\delta$ of zero (except zero itself) lands within your tolerance. For our stone, $|g(h) - 19.6| = 4.9|h|$, so I answer $\delta = \varepsilon / 4.9$, and I win every round. That's what it means for the limit to be 19.6. The phrase "$0 < |h|$" is the formal version of "never at zero".</p>
+
+    <h2 id="derivative"><span class="num">5</span>The derivative</h2>
+    <p>Put the pieces together. The speed at an instant is the limit of average speeds over shrinking intervals. And nothing about this used the fact that $s$ was a distance, so the same construction measures the instantaneous rate of change of any function.</p>
+    <div class="block def"><span class="label">Definition · derivative</span>
+      <p>The derivative of $f$ at the input $a$ is
+      $$f'(a) = \lim_{h \to 0} \frac{f(a+h) - f(a)}{h},$$
+      provided this limit exists. In words: the instantaneous rate of change of $f$ at $a$; geometrically, the slope of the tangent line to the graph at $(a, f(a))$. Its units are output units per input unit (here, metres per second).</p></div>
+    <p>So the stone's speed at $t = 2$ is $s'(2) = 19.6$ m/s, about 70.6 km/h. If the limit doesn't exist, we say $f$ is <em>not differentiable</em> at $a$, and §9 shows how that happens.</p>
+    <p>There's a second notation you'll see everywhere, due to Leibniz: $\dfrac{df}{dx}$. It's a reminder of where the number came from, a ratio of a small change in $f$ to a small change in $x$, taken in the limit. It is <em>not</em> literally a fraction of two numbers, but it behaves enough like one that the notation pays for itself in Part 2.</p>
+
+    <h2 id="zoom"><span class="num">6</span>The picture: zoom in until the curve is straight</h2>
+    <p>Here's the geometric heart of the derivative, and the intuition worth keeping for life. Take a smooth curve and zoom in on one point. The more you zoom, the less the curve bends within your view, until it is indistinguishable from a straight line. The slope of that line is the derivative. A differentiable function is one that <strong>looks linear up close</strong>.</p>
+
+    <figure class="widget wide" id="w-zoom">
+      <svg></svg>
+      <div class="controls-row">
+        <label>function <select id="zoom-f"><option value="sq">x²</option><option value="sin">sin x</option><option value="abs">|x|</option></select></label>
+        <label>point a <input type="range" id="zoom-a" min="-2" max="2" step="0.01" value="1"></label><output for="zoom-a"></output>
+        <label>zoom <input type="range" id="zoom-z" min="0" max="3" step="0.01" value="0"></label><span>×<output class="readout" id="zoom-zv"></output></span>
+      </div>
+      <div class="controls-row"><span id="zoom-msg" class="readout"></span></div>
+      <figcaption><b>Zoom in on any point of x² or sin x</b>, and the curve straightens into the dashed tangent line. Now choose |x| and set a = 0: no amount of zooming removes the corner. That point has no derivative (§9).</figcaption>
+    </figure>
+
+    <p>This explains why derivatives are so useful. Near any point, a complicated differentiable function can be replaced by a simple line, $f(a + h) \approx f(a) + f'(a)\,h$, and the error is small compared with $h$. Much of science and machine learning runs on that one approximation. Gradient descent, for example, is nothing but "follow the local straight line downhill".</p>
+
+    <h2 id="square"><span class="num">7</span>The derivative of $x^2$, seen as a growing square</h2>
+    <p>So far we've computed one number, $s'(2)$. Can we get the derivative at <em>every</em> point at once, as a function? Take the simplest interesting case, $f(x) = x^2$, and think of $x^2$ literally: it's the <em>area of a square</em> with side $x$.</p>
+    <p>Grow the side by a little $h$. The new area is $(x+h)^2$. How much area did we add? Look at the picture before doing algebra:</p>
+
+    <figure class="widget wide" id="w-square">
+      <svg></svg>
+      <div class="controls-row">
+        <label>side x <input type="range" id="sq-x" min="1" max="4" step="0.01" value="2.5"></label><output for="sq-x"></output>
+        <label>growth h <input type="range" id="sq-h" min="0.02" max="1.2" step="0.01" value="0.6"></label><output for="sq-h"></output>
+      </div>
+      <div class="controls-row"><span>two strips 2xh = <output class="readout" id="sq-strips"></output></span><span>corner h² = <output class="readout" id="sq-corner"></output></span><span>added area ÷ h = <output class="readout" id="sq-ratio"></output></span><span>2x = <output class="readout" id="sq-2x"></output></span></div>
+      <figcaption><b>Shrink h and watch the corner.</b> The added area is two thin strips (blue, each $x \times h$) plus a tiny corner square (orange, $h \times h$). As h shrinks, the corner vanishes much faster than the strips, so "added area ÷ h" approaches 2x.</figcaption>
+    </figure>
+
+    <p>The picture is the derivation. Here it is in symbols, each step matching a piece of the square:</p>
+    <div class="derivation" data-stepwise>
+      <div class="step"><div>$$\frac{(x+h)^2 - x^2}{h}$$</div><div class="why">added area divided by the growth, the difference quotient for $f(x) = x^2$</div></div>
+      <div class="step"><div>$$= \frac{x^2 + 2xh + h^2 - x^2}{h}$$</div><div class="why">expand: old square + two strips $xh$ + corner $h^2$</div></div>
+      <div class="step"><div>$$= \frac{2xh + h^2}{h}$$</div><div class="why">the old square cancels: only the added area remains</div></div>
+      <div class="step"><div>$$= 2x + h$$</div><div class="why">divide by $h \neq 0$: strips give $2x$, the corner gives $h$</div></div>
+      <div class="step"><div>$$\xrightarrow{\;h \to 0\;} 2x$$</div><div class="why">the corner's contribution disappears in the limit</div></div>
+    </div>
+    <div class="block key"><span class="label">Key idea</span><p>$\dfrac{d}{dx}\,x^2 = 2x$. The derivative is a <em>function</em>: feed it any point, and it returns the slope there. The two strips are the "first-order" change, proportional to $h$; the corner is "second-order", proportional to $h^2$. Derivatives keep the first-order part and throw away everything smaller.</p></div>
+    <p>Check it against the stone: $s(t) = 4.9t^2$, so $s'(t) = 4.9 \cdot 2t = 9.8t$, and $s'(2) = 19.6$, matching what we found the long way. (Multiplying a function by a constant multiplies its derivative by that constant. Pull 4.9 through the limit to see why.)</p>
+
+    <h3 id="tracer">Watching the derivative being drawn</h3>
+    <p>Because $f'$ is a function, it has its own graph: at each $x$, plot the slope of $f$ there. Drag along the curve and watch the lower graph get traced out:</p>
+    <figure class="widget wide" id="w-tracer">
+      <svg></svg>
+      <div class="controls-row">
+        <label>function <select id="tr-f"><option value="sq">x²</option><option value="cube">x³</option><option value="sin">sin x</option></select></label>
+        <label>x <input type="range" id="tr-x" min="-2.5" max="2.5" step="0.01" value="-2.5"></label><output for="tr-x"></output>
+        <span>slope f′(x) = <output class="readout" id="tr-m"></output></span>
+        <button class="btn ghost" id="tr-play">▶ Sweep</button>
+      </div>
+      <figcaption>Top: the function with its tangent line. Bottom: the slope of that tangent plotted as a height. For x², the slopes form the line 2x. For sin x they trace out cos x: the slope of a sine wave is a shifted sine wave. Notice where f′ crosses zero: exactly where f has a flat tangent, at its peaks and valleys.</figcaption>
+    </figure>
+
+    <h2 id="power"><span class="num">8</span>The power rule</h2>
+    <p>The square picture generalises. For $f(x) = x^3$, think of a cube of side $x$ growing by $h$: the added volume is three thin slabs $x^2 h$, plus thinner rods and a tiny corner cube. The slabs dominate, so the derivative should be $3x^2$. For general $x^n$ we need the expansion of $(x+h)^n$, and we only need its first two terms:</p>
+    <div class="derivation" data-stepwise>
+      <div class="step"><div>$$(x+h)^n = \underbrace{(x+h)(x+h)\cdots(x+h)}_{n \text{ factors}}$$</div><div class="why">definition of the power</div></div>
+      <div class="step"><div>$$= x^n + n\,x^{n-1}h + (\text{terms containing } h^2, h^3, \ldots)$$</div><div class="why">expanding, each term picks $x$ or $h$ from every factor. Picking $h$ from no factor gives $x^n$; picking $h$ from exactly one of the $n$ factors gives $n$ copies of $x^{n-1}h$; everything else has at least two $h$'s</div></div>
+      <div class="step"><div>$$\frac{(x+h)^n - x^n}{h} = n\,x^{n-1} + (\text{terms containing } h, h^2, \ldots)$$</div><div class="why">subtract $x^n$, divide by $h \neq 0$: each leftover term keeps at least one factor of $h$</div></div>
+      <div class="step"><div>$$\frac{d}{dx}\,x^n = n\,x^{n-1}$$</div><div class="why">take $h \to 0$: every term with an $h$ vanishes</div></div>
+    </div>
+    <p>This is the power rule. Notice that it's the growing-square argument in disguise: "$n$ copies of $x^{n-1}h$" are the $n$ slabs, and the higher-order terms are the corners. The derivation as written holds for whole numbers $n \ge 1$. The rule turns out to be true for every real exponent ($\frac{d}{dx}\sqrt{x} = \frac{1}{2}x^{-1/2}$, for example), but proving that needs tools from Part 2.</p>
+
+    <div class="block example"><span class="label">Worked example · the falling stone, all at once</span>
+      <p>$s(t) = 4.9t^2$ gives $s'(t) = 4.9 \cdot 2t = 9.8t$ by the power rule and the constant multiple. So the speed is $9.8$ m/s after 1 s, $19.6$ m/s after 2 s, and $29.4$ m/s after 3 s. The speed grows by exactly 9.8 m/s every second. That constant rate of change of speed is the acceleration $g$, and it says the derivative of the speed is $g$: a derivative of a derivative, which we'll meet again.</p>
+      <p><em>Interpretation and limits:</em> real stones feel air resistance, which grows with speed, so real speeds fall below $9.8t$ and eventually level off at a terminal velocity. The derivative is exact; the model $s = 4.9t^2$ is the approximation.</p></div>
+
+    <h2 id="breaks"><span class="num">9</span>Where the derivative breaks</h2>
+    <p>The definition asks for a limit to exist, and sometimes it doesn't. Three ways to fail are worth recognising:</p>
+    <p><strong>Corners.</strong> For $f(x) = |x|$ at 0, the difference quotient is $|h|/h$, which equals $+1$ for $h > 0$ and $-1$ for $h < 0$. Approaching from the right and from the left gives different answers, so there is no single limit and no derivative. You saw this in the zoom widget: the corner never straightens. This isn't exotic. The ReLU function used in nearly every neural network, $\max(0, x)$, has exactly this corner at 0, and deep-learning libraries simply <em>choose</em> a value there.</p>
+    <p><strong>Jumps.</strong> If the function jumps, say a price that steps up at midnight, the difference quotient blows up as $h \to 0$.</p>
+    <p><strong>Vertical tangents.</strong> $f(x) = \sqrt[3]{x}$ is smooth-looking at 0, but its tangent there is vertical, with "infinite slope", so the limit doesn't exist as a number.</p>
+
+    <h3 id="computer">On a real computer: why you can't just use a tiny h</h3>
+    <p>If the derivative is the limit as $h \to 0$, why not just compute $\frac{f(a+h) - f(a)}{h}$ with a very small $h$, like $10^{-15}$? Try it. The figure below computes the difference quotient of $\sin$ at $a = 1$ <em>live in your browser</em>, in standard double-precision arithmetic, and compares it with the true derivative, $\cos 1$.</p>
+    <figure class="widget wide" id="w-float">
+      <svg></svg>
+      <div class="controls-row">
+        <label>log₁₀ h <input type="range" id="fl-k" min="-16" max="-1" step="0.25" value="-4"></label><output for="fl-k"></output>
+        <span>computed: <output class="readout" id="fl-val"></output></span><span>true cos 1: <output class="readout" id="fl-true"></output></span><span>error: <output class="readout" id="fl-err"></output></span>
+      </div>
+      <figcaption>Error of the difference quotient against h, both on log scales. From the right, shrinking h helps: the error falls in a straight line because it is proportional to h (the "corner" term again). Below about $h = 10^{-8}$ the error <em>rises</em>: $f(a+h)$ and $f(a)$ agree in almost all of their ~16 stored digits, and subtracting them destroys those digits. At $h = 10^{-16}$, the computer can't even tell $1 + h$ from 1, and the quotient is exactly 0.</figcaption>
+    </figure>
+    <p>Two errors fight here. The <em>truncation</em> error, from using a finite $h$, is about $\frac{h}{2}|f''(a)|$ and shrinks with $h$. The <em>rounding</em> error, from subtracting nearly equal numbers, is about $\frac{\epsilon |f(a)|}{h}$, where $\epsilon \approx 2.2 \times 10^{-16}$ is double-precision's relative precision, and it <em>grows</em> as $h$ shrinks. Their sum is smallest near $h \approx \sqrt{\epsilon} \approx 10^{-8}$, giving about 8 correct digits, which is what you see in the figure. This is why machine learning doesn't differentiate networks numerically: it uses exact symbolic rules, the subject of Part 2, organised as backpropagation.</p>
+
+    <h2 id="check"><span class="num">✓</span>Check your understanding</h2>
+    <div class="check"><p><b>1. Predict.</b> A function $f$ has $f(3) = 7$ and $f'(3) = 2$. Without knowing anything else, estimate $f(3.1)$. When would your estimate be poor?</p>
+      <details><summary>Show answer</summary><p>Local linearity gives $f(3.1) \approx f(3) + f'(3)\cdot 0.1 = 7 + 0.2 = 7.2$. The estimate is poor when $f$ curves sharply near 3, that is, when the "corner" (second-order) term is large compared with $f'(3)\,h$, or when 0.1 isn't small at the scale on which $f$ bends.</p></details></div>
+    <div class="check"><p><b>2. Derive.</b> Using only the definition (no power rule), show that the derivative of $f(x) = 3x + 5$ is 3 everywhere. Then explain in one sentence why the answer had to be a constant, using the zoom picture.</p>
+      <details><summary>Show answer</summary><p>$\frac{3(x+h)+5-(3x+5)}{h} = \frac{3h}{h} = 3$ for every $h \neq 0$, so the limit is 3. A line is already straight; zooming in changes nothing, so the slope is the same everywhere.</p></details></div>
+    <div class="check"><p><b>3. Explain the bug.</b> A student computes the derivative of $x^2$ at $x = 5$ by writing $\frac{(5+h)^2 - 25}{h}$ and "plugging in $h = 0$" to get $0/0$, and concludes the derivative doesn't exist. What went wrong, and what is the right answer?</p>
+      <details><summary>Show answer</summary><p>They substituted before simplifying. While $h \neq 0$, the quotient equals $\frac{10h + h^2}{h} = 10 + h$, whose limit as $h \to 0$ is 10. The limit never evaluates the quotient <em>at</em> $h = 0$; it asks what the values approach.</p></details></div>
+
+    <p class="roadmap"><b>Next, Part 2: the chain rule.</b> What is the derivative of $\sin(x^2)$, a function inside a function? We'll see that sensitivities <em>multiply</em> along a chain, like gears, and that this one rule, applied systematically, is exactly backpropagation.</p>
+  </main>
+</div>
+<pre id="__errors"></pre><pre id="__selftest"></pre>
+</body>
+</html>
