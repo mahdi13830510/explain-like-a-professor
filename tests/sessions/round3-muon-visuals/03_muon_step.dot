@@ -1,0 +1,11 @@
+digraph G { rankdir=LR; node [shape=box, style="rounded,filled", fontname="Helvetica", fontsize=11]; edge [fontname="Helvetica", fontsize=9];
+  subgraph cluster1 { label="Part 1 (today): what and why"; style=dashed; color=gray40; fontname="Helvetica";
+    grad [label="gradient G\n(m×n, one layer)", fillcolor="#dbe9f6"];
+    mom [label="momentum\nM ← βM + G", fillcolor="#dbe9f6"];
+    polar [label="target: UVᵀ\n(M = UΣVᵀ, set Σ → I)", fillcolor="#fde2c8"]; }
+  subgraph cluster2 { label="Part 2: how"; style=dashed; color=gray40; fontname="Helvetica";
+    ns [label="Newton–Schulz\n5 matmul-only steps\n≈ UVᵀ without an SVD", fillcolor="#fde2c8"]; }
+  subgraph cluster3 { label="Part 3: the full optimizer"; style=dashed; color=gray40; fontname="Helvetica";
+    step [label="W ← W − η·s·O\n(shape scale s, which\nlayers, Nesterov)", fillcolor="#d9f0d3"]; }
+  grad -> mom; mom -> polar [label="why?"]; polar -> ns [label="how, cheaply?"]; ns -> step;
+}
