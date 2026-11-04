@@ -1,0 +1,14 @@
+{
+  "name": "eureka",
+  "description": "eureka: a teaching skill that builds hard ideas from the ground up, as interactive lessons, PDFs, slides or notebooks.",
+  "owner": { "name": "Mahdi Dolati", "url": "https://github.com/mahdi13830510" },
+  "plugins": [
+    {
+      "name": "eureka",
+      "source": "./",
+      "description": "Problem-first, component-by-component teaching with derivations and verified interactive lessons.",
+      "category": "education",
+      "tags": ["teaching", "education", "learning", "interactive"]
+    }
+  ]
+}
