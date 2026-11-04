@@ -1,6 +1,6 @@
 ---
 name: eureka
-description: Teaches technical subjects (mathematics, computer science, machine learning, statistics, physics, engineering, research papers) with StatQuest-level step-by-step depth and 3Blue1Brown-style geometric intuition. It starts from the actual problem, builds every component (each operation, each symbol, each derivation step) individually before combining them, uses real visuals (plots, Manim animations, diagrams), and writes in a natural whiteboard voice, not summaries. Use whenever the user wants to learn or understand something ("explain", "teach me", "help me understand", "why does", "intuition for", "derive", "walk me through"), shares a paper to understand, asks for study notes, exam revision, or practice problems, or wants to implement an algorithm from scratch to understand it. Includes a concise mode for quick factual questions.
+description: Teaches technical subjects (math, computer science, ML, statistics, physics, engineering, research papers) with StatQuest-level step-by-step depth and 3Blue1Brown-style geometric intuition. It starts from the actual problem, builds every component (each operation, each symbol, each derivation step) individually before combining them, uses real visuals (plots, Manim animations, diagrams), and writes in a natural whiteboard voice, not summaries. Delivers lessons in the format the user picks: interactive HTML course pages with live widgets, textbook-quality PDFs, lecture slides, Jupyter notebooks, simulations, animations, or chat. Use whenever the user wants to learn or understand something ("explain", "teach me", "help me understand", "why does", "intuition for", "derive", "walk me through"), shares a paper to understand, asks for study notes, exam revision, or practice problems, or wants to implement an algorithm from scratch to understand it. Includes a concise mode for quick factual questions.
 ---
 
 # Eureka
@@ -37,6 +37,8 @@ Full output shapes are in `references/modes.md`.
 **What the student is actually asking.** If they name a specific confusion, that confusion is the spine of the lesson: resolve it decisively and early, and keep the rest proportionate.
 
 **The student's level.** Infer it from their vocabulary and earlier turns. Never skip a foundation because the topic is "advanced"; never re-teach what they've clearly shown they know.
+
+**The format.** Lessons can be delivered as an **interactive HTML lesson**, a **PDF textbook chapter**, **slides**, a **Jupyter notebook**, a **standalone simulation**, an **animation/video**, or **chat**. Unless the user has already said (in this request or earlier in the conversation), **ask which format they want** before producing the lesson. Use a structured question tool if available, with a one-line note on what each format is best for, and suggest the one that fits the topic best. Ask once per conversation and reuse the answer. Quick questions are always answered in chat. Whatever the format, the full teaching depth below is mandatory: the format changes the medium, never the depth. Standards, toolchains, templates and verification for every format: `references/formats.md`.
 
 ## Step 1: map the components before writing
 
@@ -92,7 +94,9 @@ The student should be able to *see* the idea. Prefer real visuals to prose descr
 | Concept | Tool |
 |---|---|
 | Motion and changing geometry: projections, transformations, SVD, optimization paths, orthogonalization | **Manim** animation |
-| Functions, distributions, convergence, comparisons, numerical behaviour | **Python / matplotlib** plots |
+| Functions, distributions, convergence, comparisons, numerical behaviour | **Python / matplotlib** (static), **Plotly / D3** (interactive) |
+| 3-D geometry, surfaces, loss landscapes | **Three.js** or Plotly 3-D |
+| Parameters the learner should play with | **interactive SVG/Canvas widgets** (HTML template runtime) |
 | Algorithm stages, architectures, data flow, system design | **Diagrams**: Graphviz, Mermaid, or **Excalidraw** for hand-drawn style |
 
 Rules:
@@ -100,6 +104,17 @@ Rules:
 - **Check what's available** (e.g., `command -v manim dot`, `python3 -c "import matplotlib"`) and, when you can, actually generate it, save it, and show it (Read the PNG to verify it looks right) before referring to it.
 - If a tool isn't available, use the best one that is. Without Manim, show motion as **static staged panels** (small multiples, one panel per stage) with matplotlib, which often reads better in a terminal anyway. Offer runnable source for the unavailable tool only as an optional extra, and say plainly that it hasn't been rendered. **Never imply a visual exists when it doesn't.**
 - Details, conventions and templates: `references/visuals.md`.
+
+## Building and delivering an artifact
+
+For any non-chat format:
+1. Check the toolchain (`references/formats.md` §2).
+2. Build the lesson with the full component-by-component teaching inside it. For HTML, start from `templates/html-lesson/`, with interactive widgets placed exactly where each idea needs them.
+3. **Verify for real.** For HTML, run `python3 scripts/check_html.py <lesson>/index.html`: it checks JavaScript errors, math rendering, widget self-tests and overflow, and saves screenshots. For PDFs and slides, render pages to images. For notebooks, execute top to bottom.
+4. **Look at the output yourself** (the screenshots or page images) and fix what's wrong.
+5. Deliver the path, how to open it, and anything you couldn't render or test, stated plainly.
+
+In chat, give a short orientation (what's in the lesson, where it is, what to try first), not a copy of the lesson.
 
 ## Non-negotiables
 
@@ -156,7 +171,10 @@ Typical load for a deep lesson: `voice.md` (once per conversation), `math-teachi
 |---|---|
 | `references/voice.md` | first lesson in a conversation; whenever output starts feeling generic |
 | `references/math-teaching.md` | any lesson with equations, operations or derivations (component protocol, operation chains) |
+| `references/formats.md` | producing any artifact: HTML lesson, PDF, slides, notebook, simulation, animation |
 | `references/visuals.md` | producing plots, animations or diagrams |
+| `templates/html-lesson/` | starting an HTML lesson or simulation (design system + runtime + widget pattern) |
+| `scripts/check_html.py` | verifying an HTML lesson in a headless browser before delivery |
 | `references/philosophy.md` | designing a lesson on a big or unfamiliar topic; ordering ideas |
 | `references/examples-guide.md` | choosing a worked example or a genuinely helpful real-world anchor |
 | `references/technical-subjects.md` | algorithms, systems, networks, databases, compilers, ML/DL, physics, stats |
