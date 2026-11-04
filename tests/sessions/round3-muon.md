@@ -4,7 +4,7 @@ Muon is a short algorithm built on a long chain of ideas, and your question has 
 - **Part 2: Newton–Schulz.** How a matrix polynomial acts on singular values, the cubic iteration and why it converges, why the input has to be pre-scaled, and Muon's tuned quintic with its five steps.
 - **Part 3: the full optimizer.** Nesterov momentum, the shape-dependent scale factor, which parameters get Muon and which stay on AdamW, a from-scratch implementation, and its limits.
 
-![One Muon step, and which part covers which stage](/home/mahdi/.claude/skills/professor/tests/sessions/round3-muon-visuals/03_muon_step.png)
+![One Muon step, and which part covers which stage](round3-muon-visuals/03_muon_step.png)
 
 That diagram is one Muon step for one weight matrix. Today is the left box: the jump from momentum M to the target UVᵀ, and the "why?" on that arrow.
 
@@ -57,7 +57,7 @@ Ask a geometric question first. Take every unit-length input z (the unit circle 
 
 Look at the top row of this figure, which does it for our G:
 
-![SVD stages for G versus the orthogonalized O](/home/mahdi/.claude/skills/professor/tests/sessions/round3-muon-visuals/02_svd_stages_G_vs_O.png)
+![SVD stages for G versus the orthogonalized O](round3-muon-visuals/02_svd_stages_G_vs_O.png)
 
 Read the top row left to right. The unit circle carries our two input directions (blue x₁, green x₂). The first step, Vᵀ, is a rotation (or reflection) that lines those special input directions up with the coordinate axes, and the circle stays a circle. The second step, Σ, stretches the horizontal axis by 2.5 and the vertical by 0.5, and that is the only step that changes any lengths; it turns the circle into the thin ellipse. The third step, U, rotates the ellipse into its final orientation in output space. The far-right panel is exactly G applied to the circle: the blue arm is G x₁ = δ₁, length 2.5, and the green arm is G x₂ = δ₂, length 0.5.
 
@@ -93,7 +93,7 @@ This hands us the language for the update. Along the pair (vᵢ, uᵢ), the step
 
 In our toy example the ratio is 5:1. In real networks it's far more extreme. I ran a small simulation to show you rather than tell you: a 3-layer tanh MLP (64 → 128 → 128 → 10) trained by SGD with momentum 0.9 on a teacher–student regression task (Gaussian inputs, targets produced by a random fixed network), batch 256. This is a toy, not a transformer, and I'm showing it only as an illustration of the phenomenon. After 500 steps I took the momentum buffer M of the 128×128 hidden layer and computed its singular values:
 
-![Singular value spectrum of the momentum buffer versus the orthogonalized update](/home/mahdi/.claude/skills/professor/tests/sessions/round3-muon-visuals/01_momentum_spectrum.png)
+![Singular value spectrum of the momentum buffer versus the orthogonalized update](round3-muon-visuals/01_momentum_spectrum.png)
 
 In the left panel (log scale), each blue dot is σₖ/σ₁, the relative step size SGD-momentum takes along its k-th direction. They fall by almost four orders of magnitude across 128 directions. The right panel says the same thing as a cumulative share: the top 5 of 128 directions hold 74% of the update's squared size. The orange lines are the orthogonalized update UVᵀ, which takes an equal step in every direction. That flat orange line is what Muon does, and the rest of this part is about why it's a better use of the step.
 
@@ -272,4 +272,4 @@ Try these; the third sets up Part 2 directly.
 
 If question 3 makes you suspect that you can push every σᵢ toward 1 using only matrix multiplications, and never computing U, Σ or V, you've invented the core of Newton–Schulz. Say when you want Part 2 and we'll make that precise: why it converges, why G must first be divided by its norm, and why Muon uses a stranger-looking quintic with coefficients (3.4445, −4.7750, 2.0315).
 
-A Manim version of the rotate–stretch–rotate figure (animating G and O stage by stage) is at `/home/mahdi/.claude/skills/professor/tests/sessions/round3-muon-visuals/orthogonalize_scene.py`. I haven't rendered it, because Manim isn't installed here; with Manim installed, run `manim -pql orthogonalize_scene.py GvsO` and `manim -pql orthogonalize_scene.py OrthogonalizedO`.
+A Manim version of the rotate–stretch–rotate figure (animating G and O stage by stage) is at `round3-muon-visuals/orthogonalize_scene.py`. I haven't rendered it, because Manim isn't installed here; with Manim installed, run `manim -pql orthogonalize_scene.py GvsO` and `manim -pql orthogonalize_scene.py OrthogonalizedO`.
