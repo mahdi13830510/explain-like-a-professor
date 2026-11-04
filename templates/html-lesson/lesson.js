@@ -165,7 +165,13 @@
     if (!/[?&]selftest\b/.test(location.search)) return;
     const res = tests.map(([n, f]) => { try { const r = f(); return { name: n, ok: r !== false }; } catch (e) { return { name: n, ok: false, error: String(e.message || e) }; } });
     const de = document.documentElement;
-    res.push({ name: `no horizontal page overflow at ${innerWidth}px`, ok: de.scrollWidth <= de.clientWidth + 1 });
+    const over = de.scrollWidth > de.clientWidth + 1;
+    const culprits = over ? [...document.querySelectorAll("main *")].filter((e) => !e.closest(".katex-mathml, .katex-display") && e.getBoundingClientRect().right > de.clientWidth + 1)
+      .slice(0, 3).map((e) => e.tagName.toLowerCase() + (e.id ? "#" + e.id : "") + (e.className && typeof e.className === "string" ? "." + e.className.split(" ")[0] : "")) : [];
+    res.push({ name: `no horizontal page overflow at ${innerWidth}px`, ok: !over, error: over ? "widest: " + culprits.join(", ") : undefined });
+    const sizes = [...document.querySelectorAll("figure.widget svg text")].map((e) => e.getBoundingClientRect().height).filter((h) => h > 0).sort((a, b) => a - b);
+    const med = sizes.length ? sizes[Math.floor(sizes.length / 2)] : 99;
+    res.push({ name: `figure text readable at ${innerWidth}px`, ok: true, warn: med < 9 ? `median SVG label height ${med.toFixed(1)}px: consider a narrow layout or larger labels` : undefined });
     res.push({ name: "math rendered", ok: !document.querySelector(".katex-error") && (!!document.querySelector(".katex") || !/\$/.test(document.querySelector("main")?.textContent || "")) });
     const box = document.getElementById("__selftest"); if (box) box.textContent = JSON.stringify(res);
   }
