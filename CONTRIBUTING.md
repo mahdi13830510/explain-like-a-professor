@@ -1,4 +1,4 @@
-# Contributing to eureka
+# Contributing to Explain Like a Professor
 
 The skill gets better from one thing above all: **lessons that fell short.**
 
