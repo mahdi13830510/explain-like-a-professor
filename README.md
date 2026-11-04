@@ -83,7 +83,16 @@ Each one was built with eureka, verified in a headless browser, and covers a dif
 
 ## Install
 
-### Claude Code (one line)
+### Claude Code
+
+As a plugin (gets updates through `/plugin`):
+
+```
+/plugin marketplace add mahdi13830510/eureka
+/plugin install eureka@eureka
+```
+
+Or as a plain skill, in one line:
 
 ```bash
 git clone https://github.com/mahdi13830510/eureka ~/.claude/skills/eureka
