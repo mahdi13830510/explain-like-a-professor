@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How ZIP Makes Files Smaller · eureka</title>
+<meta name="description" content="An interactive lesson on Huffman coding: why plain text wastes bits, prefix-free codes, Huffman's greedy algorithm built on your own text, entropy as the floor, and how DEFLATE (ZIP, gzip, PNG) uses it.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<link rel="stylesheet" href="styles.css">
+<style>
+  /* lesson-specific pieces: text inputs, code-word chips, token strips */
+  input.txt, input.lzin, input.bits { font: 15px var(--mono); color: var(--ink); background: var(--paper); border: 1px solid var(--rule); border-radius: 8px; padding: 8px 10px; width: 100%; max-width: 520px; }
+  input.bits { max-width: 240px; letter-spacing: .08em; }
+  .presets { display: flex; flex-wrap: wrap; gap: 6px; }
+  .presets button { font: 500 13px var(--sans); color: var(--ink); background: transparent; border: 1px solid var(--rule); border-radius: 999px; padding: 4px 10px; cursor: pointer; }
+  .presets button:hover { border-color: var(--muted); }
+  .cw { display: inline-flex; align-items: baseline; gap: 4px; padding: 3px 8px; margin: 3px; border: 1.5px solid var(--c); border-radius: 7px; font: 14px var(--sans); background: color-mix(in srgb, var(--c) 9%, transparent); }
+  .cw b { font: 700 15px var(--mono); } .cw small { color: var(--muted); } .cw code { background: none; padding: 0; color: var(--ink); font-weight: 600; }
+  .codes { display: flex; flex-wrap: wrap; margin-top: 10px; }
+  .chip { display: inline-flex; flex-direction: column; align-items: center; min-width: 22px; margin: 2px 1px; padding: 2px 4px; border-bottom: 3px solid var(--c); background: color-mix(in srgb, var(--c) 10%, transparent); border-radius: 4px 4px 0 0; }
+  .chip b { font: 700 15px var(--mono); } .chip i { font: 12px var(--mono); font-style: normal; color: var(--c); font-weight: 600; letter-spacing: .03em; }
+  .parse { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 2px; padding: 6px 0; border-top: 1px solid var(--rule); }
+  .parse .word { font: 600 15px var(--sans); margin-left: 10px; align-self: center; }
+  .amb { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px 24px; }
+  @media (min-width: 760px) { .amb { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); } }
+  .bitbox { display: flex; flex-wrap: wrap; gap: 0; margin-top: 10px; max-height: 300px; overflow-y: auto; }
+  .bars { display: grid; gap: 6px; margin-top: 14px; font: 13px var(--sans); }
+  .bars .row { display: grid; grid-template-columns: 200px minmax(0, 1fr); align-items: center; gap: 10px; }
+  .bars .track { height: 14px; background: var(--code-bg); border-radius: 4px; overflow: hidden; }
+  .bars .fill { height: 100%; border-radius: 4px; }
+  @media (max-width: 600px) { .bars .row { grid-template-columns: minmax(0, 1fr); gap: 2px; } }
+  .strip { font: 16px/1.9 var(--mono); word-break: break-all; margin-top: 10px; padding: 8px 10px; background: var(--paper); border: 1px solid var(--rule); border-radius: 8px; }
+  .strip span.m { background: color-mix(in srgb, var(--muted) 14%, transparent); }
+  .strip span.src { background: color-mix(in srgb, var(--blue) 30%, transparent); box-shadow: inset 0 -2px var(--blue); }
+  .strip span.dst { background: color-mix(in srgb, var(--accent) 30%, transparent); box-shadow: inset 0 -2px var(--accent); }
+  .toks { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 10px; }
+  .tok { font: 13px var(--mono); padding: 3px 6px; border-radius: 5px; border: 1px solid var(--rule); color: var(--ink); background: transparent; }
+  .tok.ref { border-color: var(--accent); color: var(--accent); cursor: pointer; font-weight: 600; }
+  .tok.ref.sel { background: var(--accent); color: var(--surface); }
+  .morse td, .morse th { text-align: left; } .morse td:nth-child(2) { font: 600 18px var(--mono); letter-spacing: .15em; }
+  .muted { color: var(--muted); }
+  .tablewrap { overflow-x: auto; }
+  table.lt td:first-child, table.lt th:first-child, table.lt2 td:nth-child(2), table.lt2 th:nth-child(2) { text-align: left; }
+  @media (max-width: 600px) { table { font-size: 13px; } th, td { padding: 5px 6px; } }
+  figure.widget .controls-row button.btn:disabled { opacity: .45; cursor: default; }
+</style>
+<script defer src="lesson.js"></script>
+<script defer src="widgets.js"></script>
+</head>
+<body>
+<div id="progress"></div>
+<div class="topbar">
+  <span class="course">Information &amp; compression · Part 1</span><span class="spacer"></span>
+  <button class="icon-btn" id="theme-toggle" aria-label="Toggle dark mode">◐ Theme</button>
+</div>
+
+<div class="layout">
+  <nav class="toc" aria-label="Contents"><div class="toc-title">Contents</div><ol></ol></nav>
+
+  <main>
+    <header class="hero">
+      <div class="kicker">Algorithms · Part 1 of 2</div>
+      <h1>How ZIP Makes Files Smaller: Huffman Coding</h1>
+      <p class="lede">A text file spends exactly 8 bits on every character, whether it's the letter you type constantly or one you almost never use. That's wasteful, and fixing the waste without ever losing a single bit of the original is the problem this lesson solves.</p>
+      <p class="roadmap"><b>This part:</b> why fixed-length bytes waste space → Morse code's idea → why variable-length codes can be ambiguous → prefix-free codes as paths in a tree → the quantity we minimise, $\sum p_i \ell_i$ → Huffman's algorithm, built on your own text → why the greedy choice is optimal → entropy, the floor no code can beat → how ZIP's DEFLATE combines Huffman with LZ77 → why random data won't compress.
+      <br><b>Next part:</b> beating Huffman's 1-bit limit with arithmetic coding, and modelling context.
+      <br><b>Assumed:</b> you know what a bit and a byte are, and you're comfortable with logarithms. Everything else is built here.</p>
+    </header>
+
+    <h2 id="problem"><span class="num">1</span>The problem: every character costs 8 bits</h2>
+    <p>Save the text <code>mississippi river</code> to a file and you get 17 bytes. Each character, including the space, is stored as one byte: in ASCII (and in UTF-8, which agrees with ASCII for these characters) <code>m</code> is <code>01101101</code>, <code>i</code> is <code>01101001</code>, and so on. That's $17 \times 8 = 136$ bits.</p>
+    <p>Look at what those 136 bits are spent on. The letter <code>i</code> appears 5 times and <code>v</code> once, yet both cost exactly 8 bits. Worse, a byte can distinguish 256 different characters, but this text only uses 8 of them. We're paying for a menu of 256 items and ordering from 8.</p>
+    <p>Type anything into the box below and look at the shape of the counts. Every widget in this lesson that has a text box shares it, so whatever you type here follows you through the page.</p>
+
+    <figure class="widget wide" id="w-freq">
+      <input class="txt" aria-label="your text" spellcheck="false">
+      <div class="controls-row presets"><span class="muted">try:</span>
+        <button data-text="mississippi river">mississippi river</button>
+        <button data-text="the quick brown fox jumps over the lazy dog and keeps on running through the green field">an English sentence</button>
+        <button data-text="aaaaaaab">aaaaaaab</button>
+        <button data-text="abcdefgh">abcdefgh</button>
+        <button data-random>200 random letters</button></div>
+      <svg></svg>
+      <div class="controls-row"><span>characters: <output class="readout" id="fq-n"></output></span><span>distinct: <output class="readout" id="fq-k"></output></span><span>stored as bytes: <output class="readout" id="fq-bits"></output> bits</span><span>most common: <output class="readout" id="fq-top"></output></span></div>
+      <figcaption><b>Type ordinary English</b> and the bars fall off steeply: a few letters and the space do most of the work. Then press <em>200 random letters</em>: the bars flatten out. Keep both shapes in mind; the steep one is what compression feeds on, and the flat one is where it starves (§10).</figcaption>
+    </figure>
+
+    <p>There are two separate kinds of waste here, and it's worth keeping them apart because they're fixed by different ideas.</p>
+    <p>The first is <strong>alphabet waste</strong>. With only 8 distinct symbols, 3 bits per symbol are enough to give each its own pattern ($2^3 = 8$): say <code>000</code> for <code>i</code>, <code>001</code> for <code>s</code>, and so on. That brings 136 bits down to $17 \times 3 = 51$, provided the reader knows the 8-entry table. Useful, but it treats <code>i</code> and <code>v</code> the same.</p>
+    <p>The second is <strong>frequency waste</strong>: <code>i</code> is five times as common as <code>v</code>, and a fixed-length code ignores that. In typical English, the letter <code>e</code> is roughly one letter in eight while <code>z</code> is fewer than one in a thousand. So here is the question for the rest of the lesson: <strong>can we spend fewer bits on common symbols and more on rare ones, and come out ahead on average, while still being able to recover the original exactly?</strong> "Exactly" matters. This is <em>lossless</em> compression: a ZIP file must give back every byte, unlike a JPEG, which may throw detail away.</p>
+
+    <h2 id="morse"><span class="num">2</span>The insight from Morse code</h2>
+    <p>People had this idea long before computers. Telegraph operators sending Morse code tapped every symbol by hand, so time was the cost, and the code was arranged so that the most common letters were the cheapest to send:</p>
+    <table class="morse">
+      <thead><tr><th>letter</th><th>Morse</th><th>taps</th></tr></thead>
+      <tbody>
+        <tr><td>E</td><td>·</td><td>1</td></tr>
+        <tr><td>T</td><td>−</td><td>1</td></tr>
+        <tr><td>A</td><td>·−</td><td>2</td></tr>
+        <tr><td>N</td><td>−·</td><td>2</td></tr>
+        <tr><td>Q</td><td>−−·−</td><td>4</td></tr>
+        <tr><td>Z</td><td>−−··</td><td>4</td></tr>
+      </tbody>
+    </table>
+    <p>E, the most common letter in English, is a single dot. Q and Z, which are rare, take four symbols. If you send mostly E's and T's, your average message gets short. That's the whole idea of variable-length coding: <strong>give frequent symbols short codes and rare symbols long ones.</strong></p>
+    <p>But Morse hides a cheat. Between letters, the operator leaves a pause, and between words a longer one. The pause is effectively a third symbol, which tells the listener "this letter is finished." A computer file has only 0s and 1s, with no pause. So let's do what a computer would have to do: map dot to <code>0</code>, dash to <code>1</code>, and drop the pauses.</p>
+
+    <h2 id="ambiguity"><span class="num">3</span>Variable-length codes can be ambiguous</h2>
+    <p>Take just those four letters with their Morse patterns as bits: $e = \texttt{0}$, $t = \texttt{1}$, $a = \texttt{01}$, $n = \texttt{10}$. Now someone sends you <code>0110</code>. What was the message?</p>
+
+    <figure class="widget wide" id="w-ambig">
+      <div class="amb">
+        <div>
+          <div class="controls-row">
+            <label><input type="radio" name="am-mode" value="bad" checked> Morse-like code</label>
+            <label><input type="radio" name="am-mode" value="good"> prefix-free code</label>
+          </div>
+          <div class="codes" id="am-table"></div>
+          <div class="controls-row"><label>bits <input class="bits" id="am-bits" value="0110" spellcheck="false" aria-label="bitstring to decode"></label><output class="readout" id="am-count"></output></div>
+          <div id="am-list" style="margin-top:8px"></div>
+        </div>
+        <div><svg></svg></div>
+      </div>
+      <figcaption><b>Edit the bits</b> (only 0 and 1). With the Morse-like code, <code>0110</code> could be <em>ate</em>, <em>an</em>, <em>etn</em> or <em>ette</em>, and nothing in the bits says which. Try <code>010101</code> and count the readings. Then switch to the prefix-free code: every bitstring has at most one reading. On the right is each code drawn as a tree (next section); red rings mark symbols that sit on the path to another symbol.</figcaption>
+    </figure>
+
+    <p>What exactly went wrong? Look at the first two bits, <code>01</code>. The decoder has seen <code>0</code>, which is a complete codeword (<em>e</em>), but it's also the start of another codeword (<em>a</em> is <code>01</code>). It can't know whether to stop. The same clash happens between <em>t</em> = <code>1</code> and <em>n</em> = <code>10</code>. The trouble is always the same shape: <strong>one codeword is a prefix (a beginning) of another.</strong></p>
+    <p>So remove that possibility. Require that no codeword is the beginning of any other one. The second code in the widget, $e = \texttt{0}$, $t = \texttt{10}$, $a = \texttt{110}$, $n = \texttt{111}$, obeys this rule. Read <code>0110</code> with it: <code>0</code> is <em>e</em>, and nothing else starts with <code>0</code>, so the decoder commits immediately; then <code>1</code> isn't a codeword, <code>11</code> isn't either, <code>110</code> is <em>a</em>. One reading, "ea", found without ever looking ahead.</p>
+
+    <div class="block def"><span class="label">Definition · prefix-free code</span>
+      <p>A code assigns each symbol a string of bits, its <em>codeword</em>. The code is <strong>prefix-free</strong> (often just called a <em>prefix code</em>) if no codeword is a prefix of another codeword. The length of symbol $i$'s codeword is written $\ell_i$.</p></div>
+    <div class="block warn"><span class="label">Careful · the name is backwards</span>
+      <p>"Prefix code" means a code that is <em>free of</em> prefixes, not one built from them. Also, prefix-free is a sufficient condition for decodability, not a necessary one: some codes are uniquely decodable while violating it, but they make the decoder wait and look ahead. It's known (the Kraft–McMillan theorem) that such codes can never achieve shorter lengths than the best prefix-free code, so nothing is lost by insisting on prefix-free, and decoding stays instantaneous.</p></div>
+
+    <h2 id="trees"><span class="num">4</span>Prefix-free codes are paths in a binary tree</h2>
+    <p>There's a picture that makes the prefix condition obvious. Start at a root and read a codeword bit by bit: <code>0</code> means "go left", <code>1</code> means "go right". Every codeword becomes a path, and the symbol sits wherever its path ends. The codeword's length $\ell_i$ is the symbol's depth in the tree.</p>
+    <p>Now ask what "one codeword is a prefix of another" means in the picture. If <code>0</code> is a prefix of <code>01</code>, then the path to <em>a</em> passes <em>through</em> the node where <em>e</em> sits. That's the red ring in the Morse-like tree above: a symbol sitting on the way to another symbol. So the prefix condition has a clean geometric meaning: <strong>a code is prefix-free exactly when every symbol is at a leaf</strong>, a node with nothing below it.</p>
+    <p>And this is why decoding is instantaneous. Start at the root, follow one edge per bit, and the moment you land on a leaf, you've finished a symbol, because there is nowhere further to go. Output it and jump back to the root. Watch it happen:</p>
+
+    <figure class="widget wide" id="w-walk">
+      <svg></svg>
+      <div class="controls-row">
+        <label>word (letters a, e, n, t) <input class="bits" id="wk-word" value="antenna" spellcheck="false" style="max-width:150px"></label>
+        <button class="btn" id="wk-step">Step one bit</button><button class="btn ghost" id="wk-play">▶ Play</button><button class="btn ghost" id="wk-reset">Reset</button>
+        <span>bits read: <output class="readout" id="wk-pos"></output></span><span>decoded: <output class="readout" id="wk-out"></output></span>
+      </div>
+      <figcaption>The word is encoded with $e = \texttt{0}$, $t = \texttt{10}$, $a = \texttt{110}$, $n = \texttt{111}$. <b>Step through the bits</b>: the orange node is where the decoder is now and the shaded path is how it got there. Notice that the decoder never needs to look ahead or back up: each leaf is a decision that can't be wrong.</figcaption>
+    </figure>
+
+    <h3 id="budget">The price of a short codeword</h3>
+    <p>The tree also shows the catch. Giving <em>e</em> the 1-bit codeword <code>0</code> uses up the entire left half of the tree: nothing else may start with <code>0</code>, so every other symbol is pushed into the right half and gets longer. Short codewords are expensive. How expensive, exactly?</p>
+    <p>Imagine all bit strings of some long length $D$ (at least as long as every codeword). There are $2^D$ of them. A codeword of length $\ell$ "claims" every one of those strings that begins with it, and there are $2^{D-\ell}$ such strings. Because no codeword is a prefix of another, no long string begins with two different codewords, so the claimed sets never overlap:</p>
+    <div class="derivation" data-stepwise>
+      <div class="step"><div>$$\sum_i 2^{D-\ell_i} \le 2^D$$</div><div class="why">the claimed sets are disjoint, so together they can't exceed all $2^D$ strings</div></div>
+      <div class="step"><div>$$\sum_i 2^{-\ell_i} \le 1$$</div><div class="why">divide both sides by $2^D$</div></div>
+      <div class="step"><div>$$\tfrac12 + \tfrac14 + \tfrac18 + \tfrac18 = 1$$</div><div class="why">check: our code $e, t, a, n$ with lengths 1, 2, 3, 3 spends the budget exactly</div></div>
+    </div>
+    <p>This is the <strong>Kraft inequality</strong>. Read $2^{-\ell}$ as the share of a budget of 1 that a codeword of length $\ell$ consumes: a 1-bit codeword costs half the budget, a 2-bit codeword a quarter, and so on. It works in the other direction too: any lengths that fit the budget can be realised by some prefix-free code (assign codewords shortest first, each time taking the leftmost free node at the right depth). So designing a code really means choosing <em>lengths</em> that fit the budget. The question is which lengths.</p>
+
+    <h2 id="objective"><span class="num">5</span>What we're optimising: expected bits per symbol</h2>
+    <p>Suppose symbol $i$ makes up a fraction $p_i$ of the text: in <code>mississippi river</code>, $p_{\texttt{i}} = 5/17$. If it gets a codeword of length $\ell_i$, then a text of $n$ characters costs $\sum_i (n\,p_i)\,\ell_i$ bits, since symbol $i$ appears $n p_i$ times and each appearance costs $\ell_i$ bits. Dividing by $n$ gives the number that matters.</p>
+    <div class="block def"><span class="label">Definition · expected code length</span>
+      <p>$$\bar L = \sum_i p_i\,\ell_i \quad \text{bits per symbol},$$
+      where $p_i$ is the probability (here, the relative frequency) of symbol $i$, and $\ell_i$ is the length of its codeword. Each symbol's length is weighted by how often you pay it. Total size is $n \bar L$ bits.</p></div>
+    <p>Notice why this form and not another. We don't minimise the longest codeword, or the plain average of the lengths: a 9-bit codeword for a symbol that appears once is nearly free, while one extra bit on <code>i</code> costs 5 bits in our text. The weights $p_i$ say where bits are worth saving.</p>
+    <p>So the whole problem fits in one line: <strong>choose whole-number lengths $\ell_i$ that minimise $\sum_i p_i \ell_i$, subject to the budget $\sum_i 2^{-\ell_i} \le 1$.</strong> The two pull against each other. Shortening the code of <code>i</code> lowers the sum but eats budget, forcing other codes longer.</p>
+    <div class="block example"><span class="label">Worked example · the fixed 3-bit code</span>
+      <p>For <code>mississippi river</code> the counts are i 5, s 4, p 2, r 2, and 1 each for m, v, e and the space: 8 symbols, 17 characters. With 3 bits for everything, $\bar L = \sum_i p_i \cdot 3 = 3 \sum_i p_i = 3$ bits per symbol, or 51 bits total. Its budget: $8 \times 2^{-3} = 1$, fully spent. Can a better split of the same budget, short codes for <code>i</code> and <code>s</code> and long ones for the singletons, do better? Let's find the best one.</p></div>
+
+    <h2 id="huffman"><span class="num">6</span>Huffman's algorithm: merge the two rarest</h2>
+    <p>In 1951, David Huffman was a graduate student in Robert Fano's information theory course at MIT, and he solved exactly this problem; the method was published in 1952 as "A Method for the Construction of Minimum-Redundancy Codes." Fano and Claude Shannon had a top-down method that split the symbols into two groups of roughly equal probability, but it isn't always optimal. Huffman's trick was to build the tree from the <em>bottom</em> up.</p>
+    <p>Think about where the rarest symbols should go. Some symbols must sit at the deepest level of the tree; it's cheapest if they're the ones you rarely pay for. And in a good tree, a deepest leaf always has a sibling (if it didn't, you could delete its last bit and lose nothing). So the two rarest symbols can be placed side by side at the very bottom, as siblings that differ only in their final bit.</p>
+    <p>Here's the step that makes the algorithm work. Once two symbols are glued together as siblings, the rest of the tree only ever sees their parent. To the rest of the tree, "<code>v</code> or <code>e</code>" behaves like one combined symbol whose weight is the sum of both. So replace the pair with that combined symbol, and you have the same problem with one fewer symbol. Repeat until one tree remains.</p>
+    <div class="block def"><span class="label">Algorithm · Huffman coding</span>
+      <p>1. Make one single-node tree per symbol, weighted by its count (or probability).<br>
+      2. Take the two trees with the smallest weights. Make them the left (<code>0</code>) and right (<code>1</code>) children of a new node whose weight is their sum.<br>
+      3. Repeat step 2 until a single tree remains. Each symbol's codeword is its path from the root.<br>
+      With $k$ symbols there are exactly $k - 1$ merges. Ties can be broken any way you like: different choices give different codes with the same $\bar L$.</p></div>
+
+    <figure class="widget wide" id="w-huff">
+      <input class="txt" aria-label="your text" spellcheck="false">
+      <svg></svg>
+      <div class="controls-row">
+        <button class="btn" id="hf-step">Merge next pair</button><button class="btn ghost" id="hf-play">▶ Play</button><button class="btn ghost" id="hf-back">◀ Back</button><button class="btn ghost" id="hf-reset">Reset</button>
+        <output class="readout" id="hf-pos"></output>
+      </div>
+      <div class="controls-row"><span id="hf-msg"></span></div>
+      <div class="codes" id="hf-codes"></div>
+      <figcaption>Your text from §1, built into a Huffman tree. Trees are kept sorted by weight, so the two in dashed boxes, the lightest, are always merged next; the green ring marks the node just created. Numbers in grey nodes are combined weights. <b>Watch the codes below the tree</b>: every merge puts one new bit <em>in front of</em> the code of every symbol inside the two merged trees, so codes grow from their last bit to their first.</figcaption>
+    </figure>
+
+    <p>Let's run it on <code>mississippi river</code> by hand. Ties are broken by taking older trees first, which is what the widget does:</p>
+    <table class="lt2">
+      <thead><tr><th>merge</th><th>lightest two trees</th><th>new weight</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>␣ (1) + e (1)</td><td>2</td></tr>
+        <tr><td>2</td><td>m (1) + v (1)</td><td>2</td></tr>
+        <tr><td>3</td><td>p (2) + r (2)</td><td>4</td></tr>
+        <tr><td>4</td><td>{␣,e} (2) + {m,v} (2)</td><td>4</td></tr>
+        <tr><td>5</td><td>s (4) + {p,r} (4)</td><td>8</td></tr>
+        <tr><td>6</td><td>{␣,e,m,v} (4) + i (5)</td><td>9</td></tr>
+        <tr><td>7</td><td>{s,p,r} (8) + {␣,e,m,v,i} (9)</td><td>17</td></tr>
+      </tbody>
+    </table>
+    <p>The result gives <code>i</code> and <code>s</code> 2-bit codes, <code>p</code> and <code>r</code> 3-bit codes, and the four singletons 4-bit codes. Check the budget: $2 \cdot \tfrac14 + 2 \cdot \tfrac18 + 4 \cdot \tfrac1{16} = 1$. Spent exactly, as it always is for a Huffman tree, because every internal node has two children.</p>
+    <p>Now the cost. There's a lovely shortcut hiding in the widget's last message. Each merge adds one bit to every occurrence of every symbol under the new node, so it adds exactly the new node's weight to the total. The total is therefore just the sum of all merge weights:</p>
+    <div class="derivation" data-stepwise>
+      <div class="step"><div>$$\text{bits} = \sum_i \text{count}_i \cdot \ell_i$$</div><div class="why">every occurrence of symbol $i$ costs $\ell_i$ bits</div></div>
+      <div class="step"><div>$$= 5\cdot2 + 4\cdot2 + 2\cdot3 + 2\cdot3 + 4\cdot(1\cdot4)$$</div><div class="why">i and s at depth 2; p and r at depth 3; m, v, e, ␣ at depth 4</div></div>
+      <div class="step"><div>$$= 10 + 8 + 6 + 6 + 16 = 46$$</div><div class="why">add up the cost of each symbol</div></div>
+      <div class="step"><div>$$= 2 + 2 + 4 + 4 + 8 + 9 + 17 = 46$$</div><div class="why">same total from the merge weights: each merge adds one bit to everything beneath it</div></div>
+      <div class="step"><div>$$\bar L = \tfrac{46}{17} \approx 2.706 \text{ bits/symbol}$$</div><div class="why">divide by the 17 characters</div></div>
+    </div>
+    <p>46 bits, against 51 for the fixed 3-bit code and 136 for plain bytes. Most of the drop from 136 is alphabet waste (136 → 51); Huffman's use of the frequencies takes the next 5 bits (51 → 46), about 10%. On real English text, with a steeper frequency curve, the second effect is larger.</p>
+    <div class="block warn"><span class="label">Careful · the decoder needs the code too</span>
+      <p>The 46 bits are useless without the code table. For a 17-character message, describing the table costs on the order of the 90 bits we saved, so this tiny file wouldn't actually shrink. On a file of thousands of characters the table is a small fixed cost. DEFLATE makes it smaller still by sending only each symbol's code <em>length</em>, from which the decoder rebuilds an agreed "canonical" code (§9).</p></div>
+
+    <h2 id="optimal"><span class="num">7</span>Why the greedy choice is optimal</h2>
+    <p>Merging the two rarest looks like a reasonable heuristic, the kind that usually works. In fact it is <em>always</em> optimal: no prefix-free code for these frequencies has a smaller $\bar L$. The argument is short and worth owning, because it tells you why the algorithm is shaped the way it is. It has three parts.</p>
+    <p><strong>First, an optimal tree has no wasted branches.</strong> If some internal node had only one child, you could delete that node and pull its subtree up one level: every code below it gets one bit shorter and the code stays prefix-free. So in an optimal tree every internal node has two children, which means the deepest leaf has a sibling leaf at the same depth.</p>
+    <p><strong>Second, rare symbols can always go deepest.</strong> This is an exchange argument. Suppose a common symbol $a$ sits deeper than a rarer symbol $x$: $p_a \ge p_x$ but $d_a > d_x$. Try swapping them and see what happens to the cost.</p>
+    <div class="derivation" data-stepwise>
+      <div class="step"><div>$$\text{before: } p_a d_a + p_x d_x \qquad \text{after: } p_a d_x + p_x d_a$$</div><div class="why">swap which symbol sits at which leaf; nothing else changes</div></div>
+      <div class="step"><div>$$\text{after} - \text{before} = p_a(d_x - d_a) + p_x(d_a - d_x)$$</div><div class="why">subtract and group the terms by symbol</div></div>
+      <div class="step"><div>$$= (p_a - p_x)(d_x - d_a) \le 0$$</div><div class="why">first factor $\ge 0$ (a is more common), second $< 0$ (x was shallower): the swap never hurts</div></div>
+    </div>
+    <p>Keep swapping and the two rarest symbols end up in the two deepest positions, which by the first point can be a pair of siblings, without the cost ever going up. So some optimal tree has the two rarest symbols as deepest siblings. That's precisely what Huffman's first merge commits to. Try the exchange yourself on the tree shape Huffman found:</p>
+
+    <figure class="widget wide" id="w-swap">
+      <svg></svg>
+      <div class="controls-row">
+        <button class="btn ghost" id="sw-worst">Common symbols deepest</button><button class="btn ghost" id="sw-best">Rarest symbols deepest</button>
+        <span>total bits: <output class="readout" id="sw-total"></output></span><span>per symbol: <output class="readout" id="sw-avg"></output></span><output class="readout" id="sw-verdict"></output>
+      </div>
+      <figcaption>The tree shape is fixed; only the labels move. Each leaf shows its symbol and its count in <code>mississippi river</code>, and the cost is $\sum \text{count} \times \text{depth}$. <b>Click one leaf, then another, to swap them.</b> Every swap that moves a more common symbol to a shallower spot lowers the total, exactly as the derivation says. You can't beat 46 on this shape, and Huffman's argument shows no other shape beats it either.</figcaption>
+    </figure>
+
+    <p><strong>Third, merging reduces the problem honestly.</strong> Take a tree $T$ in which the rarest two, $x$ and $y$, are siblings, and let $T'$ be the same tree with $x$ and $y$ replaced by a single leaf $z$ of weight $p_x + p_y$, one level up. Their codes in $T$ are one bit longer than $z$'s code in $T'$, so</p>
+    $$\bar L(T) = \bar L(T') + p_x + p_y.$$
+    <p>The extra term $p_x + p_y$ is the same whatever $T'$ looks like. So the best $T$ comes from the best $T'$: the problem with one fewer symbol, which is exactly what the algorithm solves next. By induction on the number of symbols (a single symbol is trivially optimal), every Huffman tree is optimal. Notice that this equation is the "add the merge weight" shortcut from §6, now doing the work of a proof.</p>
+    <div class="block key"><span class="label">Key idea</span><p>Huffman never has to look ahead. The two rarest symbols belong together at the bottom of <em>some</em> optimal tree, and after merging them the remaining problem is the same problem, smaller. Greedy choices that keep the remaining problem the same shape are what make greedy algorithms correct.</p></div>
+
+    <h2 id="entropy"><span class="num">8</span>The floor: entropy</h2>
+    <p>Huffman finds the best prefix-free code. But how good is "best"? Is there a number, depending only on the frequencies, that says how far any such code could ever go? There is, and the budget from §4 leads straight to it.</p>
+    <p>Suppose every probability were a power of ½, as with $p = (\tfrac12, \tfrac14, \tfrac18, \tfrac18)$. Then choose $\ell_i = \log_2(1/p_i)$, giving lengths 1, 2, 3, 3. The budget is $\sum 2^{-\ell_i} = \sum p_i = 1$: exactly spent. Each symbol gets a share of the budget equal to its share of the text, which is about as fair as an allocation gets. That's our $e, t, a, n$ code, and its average length is $\sum p_i \log_2(1/p_i) = \tfrac12 \cdot 1 + \tfrac14 \cdot 2 + \tfrac18\cdot 3 + \tfrac18 \cdot 3 = 1.75$ bits. This quantity has a name.</p>
+    <div class="block def"><span class="label">Definition · entropy (Shannon, 1948)</span>
+      <p>$$H = -\sum_i p_i \log_2 p_i = \sum_i p_i \log_2 \frac{1}{p_i} \quad \text{bits per symbol}.$$
+      Read $\log_2(1/p_i)$ as the ideal length for a symbol of probability $p_i$: a symbol that appears half the time deserves 1 bit, one that appears a sixteenth of the time deserves 4. $H$ averages those ideal lengths with the same weights $p_i$ as $\bar L$. Symbols with $p_i = 0$ contribute nothing.</p></div>
+    <p>Two facts make $H$ the right yardstick. They're the core of Shannon's source coding theorem, applied to codes that encode one symbol at a time.</p>
+    <p><strong>No prefix-free code beats it:</strong> $\bar L \ge H$ for every code that fits the budget. The proof is three lines, using one inequality: since $\log_2$ is concave, the average of $\log_2$ of some numbers is at most $\log_2$ of their average (Jensen's inequality).</p>
+    <div class="derivation" data-stepwise>
+      <div class="step"><div>$$H - \bar L = \sum_i p_i \log_2 \frac1{p_i} - \sum_i p_i \log_2 2^{\ell_i} = \sum_i p_i \log_2 \frac{2^{-\ell_i}}{p_i}$$</div><div class="why">write $\ell_i$ as $\log_2 2^{\ell_i}$ and combine the logs</div></div>
+      <div class="step"><div>$$\le \log_2 \sum_i p_i \cdot \frac{2^{-\ell_i}}{p_i} = \log_2 \sum_i 2^{-\ell_i}$$</div><div class="why">Jensen: a $p$-weighted average of logs is at most the log of the $p$-weighted average</div></div>
+      <div class="step"><div>$$\le \log_2 1 = 0$$</div><div class="why">the Kraft budget: $\sum_i 2^{-\ell_i} \le 1$</div></div>
+    </div>
+    <p><strong>And Huffman comes within 1 bit of it:</strong> $H \le \bar L_{\text{Huffman}} < H + 1$. The ideal lengths $\log_2(1/p_i)$ usually aren't whole numbers. Round each one up, $\ell_i = \lceil \log_2(1/p_i) \rceil$: rounding up only shrinks each $2^{-\ell_i}$, so these lengths still fit the budget, and each is less than one bit above its ideal, so their average is below $H + 1$. Huffman is optimal, so it does at least as well as this rounded-up code.</p>
+
+    <div class="block example"><span class="label">Worked example · the entropy of "mississippi river"</span>
+      <p>Each symbol's ideal length, $\log_2(17/\text{count})$, weighted by its frequency:</p>
+      <div class="tablewrap"><table class="lt">
+        <thead><tr><th>symbol</th><th>count</th><th>$p_i$</th><th>$\log_2(1/p_i)$</th><th>$p_i \log_2(1/p_i)$</th><th>Huffman $\ell_i$</th></tr></thead>
+        <tbody>
+          <tr><td>i</td><td>5</td><td>0.294</td><td>1.766</td><td>0.519</td><td>2</td></tr>
+          <tr><td>s</td><td>4</td><td>0.235</td><td>2.087</td><td>0.491</td><td>2</td></tr>
+          <tr><td>p, r (each)</td><td>2</td><td>0.118</td><td>3.087</td><td>0.363</td><td>3</td></tr>
+          <tr><td>m, v, e, ␣ (each)</td><td>1</td><td>0.059</td><td>4.087</td><td>0.240</td><td>4</td></tr>
+        </tbody>
+      </table></div>
+      <p>$H = 0.519 + 0.491 + 2(0.363) + 4(0.240) \approx 2.699$ bits per symbol, so about $17 \times 2.699 \approx 45.9$ bits is the floor for this text. Huffman's 46 bits, 2.706 per symbol, is within 0.01 bits per symbol of it. Look at the last column next to the ideal lengths: Huffman rounded 1.77 up to 2, 2.09 down to 2, 3.09 down to 3, 4.09 down to 4. It is <em>not</em> just rounding each ideal length; it trades bits between symbols to fit the budget exactly.</p></div>
+
+    <p>Now encode your own text. The coloured strip is the actual compressed bitstream, one chip per character:</p>
+    <figure class="widget wide" id="w-enc">
+      <input class="txt" aria-label="your text" spellcheck="false">
+      <div class="bitbox" id="en-bits"></div>
+      <div class="bars">
+        <div class="row"><span>plain bytes, 8 bits each: <b id="en-raw"></b></span><div class="track"><div class="fill" id="en-bar-raw" style="background:var(--muted)"></div></div></div>
+        <div class="row"><span id="en-lab-fixed"></span><div class="track"><div class="fill" id="en-bar-fixed" style="background:var(--purple)"></div></div></div>
+        <div class="row"><span>Huffman: <b id="en-huff"></b> bits</span><div class="track"><div class="fill" id="en-bar-huff" style="background:var(--accent)"></div></div></div>
+        <div class="row"><span id="en-lab-H"></span><div class="track"><div class="fill" id="en-bar-H" style="background:var(--blue)"></div></div></div>
+      </div>
+      <div class="controls-row"><span>Huffman bits/symbol: <output class="readout" id="en-bps"></output></span><span>entropy H: <output class="readout" id="en-H"></output></span><span>size vs bytes: <output class="readout" id="en-ratio"></output></span></div>
+      <figcaption>Each chip is one character with its Huffman codeword underneath; concatenate the codewords and you have the file. <b>Edit the text</b> and watch the orange bar hug the blue one: Huffman's bits/symbol is never below $H$ and always less than $H + 1$. Type <code>aaaaaaab</code> to see the gap at its worst.</figcaption>
+    </figure>
+
+    <h3 id="skew">Where the 1-bit gap bites</h3>
+    <p>The worst case is a very lopsided distribution. With <code>aaaaaaab</code>, $p_a = 7/8$, so $a$ carries only $\log_2(8/7) \approx 0.19$ bits of information. But a codeword can't be shorter than one bit, so Huffman pays a full bit for every <code>a</code>: 1 bit/symbol against $H \approx 0.54$. The slider below sweeps 8 symbols from uniform to extremely skewed (illustrative probabilities, $p_i \propto r^i$):</p>
+    <figure class="widget wide" id="w-skew">
+      <svg></svg>
+      <div class="controls-row">
+        <label>skew <input type="range" id="sk-s" min="0" max="1" step="0.01" value="0.5"></label><output for="sk-s"></output>
+        <span>H = <output class="readout" id="sk-H"></output></span><span>Huffman = <output class="readout" id="sk-L"></output></span><span>gap = <output class="readout" id="sk-gap"></output></span><span>saving vs 3 bits: <output class="readout" id="sk-save"></output></span>
+      </div>
+      <figcaption><b>Drag the slider from left to right.</b> At skew 0 all 8 symbols are equally likely, every code length is 3, and Huffman saves nothing over a fixed 3-bit code: $H = \bar L = 3$. As the distribution tilts, both curves fall and Huffman tracks entropy closely. At the far right, the top symbol has probability about 0.95 and carries only about 0.07 bits, yet costs a whole bit: the orange curve flattens near 1 while entropy keeps dropping. That gap is what arithmetic coding, Part 2, removes.</figcaption>
+    </figure>
+
+    <h2 id="deflate"><span class="num">9</span>What ZIP actually does: DEFLATE</h2>
+    <p>Huffman alone looks at symbols one at a time, as if each character were drawn independently from the same frequency table. Real files aren't like that. Source code repeats identifiers, HTML repeats tags, logs repeat whole lines. To Huffman, <code>abababab</code> is just "half a's, half b's": 1 bit per symbol, 8 bits. Yet the whole string could be described as "<code>ab</code>, then repeat it 3 more times." Huffman can't see repetition or context, because it only sees counts.</p>
+    <p>DEFLATE, the format inside ZIP files, gzip and PNG images, handles this with a second component that runs <em>before</em> Huffman. It was designed by Phil Katz for PKZIP and is specified in RFC 1951 (1996). The first stage is <strong>LZ77</strong>, named after Abraham Lempel and Jacob Ziv's 1977 paper: whenever the text repeats something seen recently, replace the repeat with a <em>back-reference</em>, "go back $d$ characters and copy $\ell$ of them." In DEFLATE, $d$ can reach back up to 32,768 bytes and $\ell$ runs from 3 to 258.</p>
+
+    <figure class="widget wide" id="w-lz">
+      <input class="lzin" id="lz-text" value='&lt;li&gt;&lt;a href=&quot;/docs&quot;&gt;docs&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href=&quot;/blog&quot;&gt;blog&lt;/a&gt;&lt;/li&gt;' aria-label="text for LZ77" spellcheck="false">
+      <div class="controls-row presets"><span class="muted">try:</span>
+        <button data-lz='&lt;li&gt;&lt;a href=&quot;/docs&quot;&gt;docs&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href=&quot;/blog&quot;&gt;blog&lt;/a&gt;&lt;/li&gt;'>HTML</button>
+        <button data-lz="to be, or not to be, that is the question">Hamlet</button>
+        <button data-lz="abcabcabcabcabcabc">abcabc…</button>
+        <button data-lz="mississippi river">mississippi river</button></div>
+      <div class="strip" id="lz-strip"></div>
+      <div class="toks" id="lz-toks"></div>
+      <div class="controls-row"><span>characters: <output class="readout" id="lz-n"></output></span><span>literals: <output class="readout" id="lz-lit"></output></span><span>back-references: <output class="readout" id="lz-ref"></output></span></div>
+      <div class="controls-row"><output class="readout" id="lz-sel"></output></div>
+      <figcaption>The input becomes a sequence of tokens: plain characters (literals) and orange back-references written <code>↶ distance, length</code>. <b>Click a back-reference</b> to see where it copies from (blue) and what it produces (orange). Try <em>abcabc…</em>: one reference copies 15 characters from only 3 back, overlapping itself. That's legal, because the decoder copies one character at a time and the source is filled in just before it's needed. This toy uses a simple greedy longest-match search; real encoders like zlib use hash tables and smarter match choices, so their tokens differ, but the token format is the same idea.</figcaption>
+    </figure>
+
+    <p>Then Huffman finishes the job on the <em>tokens</em>. DEFLATE uses two Huffman codes per block. One covers an alphabet of 286 symbols: the 256 possible byte values as literals, an end-of-block marker, and 29 symbols for match lengths (with a few extra raw bits to pick an exact length inside a range). The other covers 30 symbols for distances, again with extra bits. Short, common distances and common lengths get short codes, just like <code>i</code> did.</p>
+    <p>Two practical details connect back to what we built. Each block can carry its own <em>dynamic</em> Huffman codes, described compactly by listing only each symbol's code length (a "canonical" code, which the decoder reconstructs from the lengths alone; the lengths themselves are Huffman-coded too), or use a fixed code defined in the standard, or be stored uncompressed. And DEFLATE caps code lengths at 15 bits, so when Huffman's tree is deeper than that, an encoder has to adjust the lengths, giving up a little optimality for a bounded decoder.</p>
+    <div class="block key"><span class="label">Key idea</span><p>LZ77 removes <em>repetition</em> (long-range structure); Huffman removes <em>skewed frequencies</em> (symbol-level structure) in what's left. Neither does the other's job, which is why DEFLATE uses both.</p></div>
+    <p>Huffman's two built-in limits still apply after LZ77. It treats each token as independent of the previous one, so it can't exploit context like "after <code>q</code> comes <code>u</code>". And every codeword is a whole number of bits, so very common symbols are overcharged, the gap you saw in the skew slider. Newer formats attack these limits: arithmetic coding and asymmetric numeral systems (ANS) can effectively spend fractions of a bit per symbol, and context models predict each symbol from what came before. That's Part 2.</p>
+
+    <h2 id="random"><span class="num">10</span>Uniform and random data: nothing to squeeze</h2>
+    <p>Go back to the first widget and press <em>200 random letters</em>, then look at the encoder. The bars are roughly flat, the entropy is close to $\log_2 26 \approx 4.70$ bits, and Huffman lands near it. The only saving over bytes comes from the alphabet: 26 letters need about 4.7 bits rather than 8, which is the alphabet waste from §1, not frequency waste. Now imagine truly random <em>bytes</em>, all 256 values equally likely. Then $H = \log_2 256 = 8$ bits, every Huffman code is 8 bits long, and there is nothing at all to gain. The skew slider at 0 shows the same thing in miniature: uniform in, no saving out.</p>
+    <p>This isn't a weakness of Huffman; no lossless compressor can shrink every input. Here's the counting argument, and it needs nothing but arithmetic:</p>
+    <div class="derivation" data-stepwise>
+      <div class="step"><div>$$\#\{\text{files of exactly } n \text{ bits}\} = 2^n$$</div><div class="why">each of the $n$ bits is 0 or 1</div></div>
+      <div class="step"><div>$$\#\{\text{files shorter than } n \text{ bits}\} = 2^0 + 2^1 + \cdots + 2^{n-1} = 2^n - 1$$</div><div class="why">add up all shorter lengths (a geometric series)</div></div>
+      <div class="step"><div>$$2^n - 1 < 2^n$$</div><div class="why">so if every $n$-bit file shrank, two would share an output, and decompression couldn't tell them apart</div></div>
+    </div>
+    <p>A compressor is a bet that its inputs have structure: skewed frequencies, repetition, predictable context. When the bet loses, the best it can do is not grow the file much, which is why DEFLATE has a "stored" block type that just copies the bytes. It's also why zipping a JPEG, an MP4, or another ZIP saves almost nothing: their bytes have already been compressed, and look nearly random to Huffman.</p>
+    <div class="block warn"><span class="label">Careful · entropy depends on the model</span>
+      <p>The $H$ in this lesson is computed from single-character frequencies, so it's the floor for codes that encode one character at a time with a fixed table. <code>abababab</code> has $H = 1$ bit per symbol under that model, yet it is perfectly predictable. A model that looks at the previous character would assign it far lower entropy. "Random-looking to Huffman" and "incompressible" are not the same thing.</p></div>
+
+    <h2 id="check"><span class="num">✓</span>Check your understanding</h2>
+    <div class="check"><p><b>1. Build and count.</b> Run Huffman by hand on <code>aaaabbc</code>. What are the code lengths, how many bits does the text take, and how does that compare with $7 \times 8$ and with $7H$? (Then check with the widgets.)</p>
+      <details><summary>Show answer</summary><p>Counts: a 4, b 2, c 1. Merge c (1) and b (2) into weight 3, then that tree (3) with a (4) into 7. So a gets 1 bit and b, c get 2 bits: $4\cdot1 + 2\cdot2 + 1\cdot2 = 10$ bits, against 56 as bytes. Merge-weight shortcut: $3 + 7 = 10$. Entropy: $H = \tfrac47\log_2\tfrac74 + \tfrac27\log_2\tfrac72 + \tfrac17\log_2 7 \approx 1.379$ bits, so $7H \approx 9.65$ bits; Huffman's $10/7 \approx 1.429$ bits/symbol is within 1 bit of $H$, as promised.</p></details></div>
+    <div class="check"><p><b>2. Spot the waste.</b> Is the code $\{\texttt{0}, \texttt{10}, \texttt{110}, \texttt{1110}\}$ prefix-free? Could it be improved without looking at any frequencies?</p>
+      <details><summary>Show answer</summary><p>It is prefix-free: every codeword ends at a leaf. But its Kraft sum is $\tfrac12 + \tfrac14 + \tfrac18 + \tfrac1{16} = \tfrac{15}{16} < 1$, so budget is left over. In the tree, node <code>111</code> has only one child, <code>1110</code>. Replace <code>1110</code> by <code>111</code>: still prefix-free, and that symbol is one bit cheaper whatever the frequencies. This is the "no wasted branches" step of the optimality proof.</p></details></div>
+    <div class="check"><p><b>3. Predict.</b> A file is the two characters <code>ab</code> repeated 10,000 times. Roughly what will Huffman alone achieve, and what will DEFLATE achieve? Why the difference?</p>
+      <details><summary>Show answer</summary><p>Huffman sees $p_a = p_b = \tfrac12$, so 1 bit per character: 20,000 bits, 8× smaller than bytes but nowhere near the structure's true simplicity. LZ77 emits two literals and then back-references with distance 2 (each copy at most 258 long, so roughly 78 of them), and Huffman codes those few tokens: a file of a few dozen bytes. The difference is that the information is in the <em>order</em> of symbols, which only LZ77 sees.</p></details></div>
+    <div class="check"><p><b>4. Find the flaw.</b> Someone claims their compressor makes every file at least one byte smaller, so running it repeatedly shrinks anything to nothing. Show it can't be lossless.</p>
+      <details><summary>Show answer</summary><p>There are $2^n$ files of $n$ bits but only $2^n - 1$ shorter files, so two different inputs would map to the same output, and the decompressor couldn't know which to return. Any lossless compressor that shrinks some files must grow others (or leave them the same size).</p></details></div>
+    <div class="check"><p><b>5. Explain.</b> In the skew widget at the far right, why does Huffman's curve level off near 1 while the entropy keeps falling toward 0?</p>
+      <details><summary>Show answer</summary><p>Every symbol needs a codeword of at least one bit, so $\bar L \ge \sum_i p_i \cdot 1 = 1$. Entropy has no such floor: a symbol with probability near 1 carries almost no information, $\log_2(1/p) \to 0$. The difference is the integer-length restriction, and removing it (coding many symbols jointly, or with arithmetic coding) is the subject of Part 2.</p></details></div>
+
+    <p class="roadmap"><b>Next, Part 2: past the 1-bit wall.</b> Huffman's codewords are whole bits, so a symbol with probability 0.95 still costs a full bit. Arithmetic coding encodes a whole message as a single number in an interval that shrinks by a factor $p$ for each symbol, getting within a few bits of $nH$ for the entire message. Then we'll let the probabilities depend on context, which is where modern compressors get their power.</p>
+  </main>
+</div>
+<pre id="__errors"></pre><pre id="__selftest"></pre>
+</body>
+</html>
