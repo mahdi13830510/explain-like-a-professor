@@ -71,6 +71,14 @@ A beautiful page with shallow text is a failure.
 | distributions | parameter sliders reshape the density; sample and histogram live |
 | algorithms | step / play / reset through every operation, with the state table updating |
 
+**Plot helper options.** `L.plot(svg, {xmin, xmax, ymin, ymax, w, h, equal, grid, axes, ticks})`:
+- `equal: true` gives true aspect ratio for geometry;
+- `axes: false` hides the zero lines, for scale drawings;
+- `ticks: "edge"` puts tick labels on the frame instead of the zero lines, useful when curves cross the axis;
+- `ticks: "none"` removes tick labels.
+
+Everything drawn with `P.fn/line/dot/text/arrow` or inside `P.layer()` is clipped to the frame; use `P.unclipped()` for labels outside it. Tick labels have a halo, so grid lines never cut through them. An explicit `fill` attribute on text overrides the theme colour.
+
 **Libraries.** Use whatever explains best:
 - the template's SVG helpers for most 2-D math;
 - Canvas for many points or particles;
