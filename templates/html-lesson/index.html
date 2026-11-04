@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LESSON TITLE · eureka</title>
+<meta name="description" content="ONE-SENTENCE DESCRIPTION">
+<!-- Fonts: optional; the system fallbacks in styles.css look fine offline. -->
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&display=swap" rel="stylesheet">
+<!-- KaTeX (pinned). For offline use, run scripts/vendor_katex.sh and switch these to assets/katex/. -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<link rel="stylesheet" href="styles.css">
+<script defer src="lesson.js"></script>
+<script defer src="widgets.js"></script> <!-- this lesson's interactive figures -->
+</head>
+<body>
+<div id="progress"></div>
+<div class="topbar">
+  <span class="course">COURSE / SERIES NAME · Part N</span><span class="spacer"></span>
+  <button class="icon-btn" id="theme-toggle" aria-label="Toggle dark mode">◐ Theme</button>
+</div>
+
+<div class="layout">
+  <nav class="toc" aria-label="Contents"><div class="toc-title">Contents</div><ol></ol></nav>
+
+  <main>
+    <header class="hero">
+      <div class="kicker">KICKER (e.g. Calculus · Part 1 of 3)</div>
+      <h1>LESSON TITLE</h1>
+      <p class="lede">The problem this lesson solves, in one or two sentences.</p>
+      <p class="roadmap">Roadmap: what this part covers, what comes next, and what is assumed.</p>
+    </header>
+
+    <!-- ===== One <h2> per major component. Prose carries the reasoning; blocks label roles. ===== -->
+    <h2><span class="num">1</span>THE PROBLEM</h2>
+    <p>Make the problem itself understandable before any solution…</p>
+
+    <div class="block def"><span class="label">Definition</span><p>Formal statement with every symbol explained: $f'(x)$ …</p></div>
+    <div class="block key"><span class="label">Key idea</span><p>The one sentence to remember.</p></div>
+    <div class="block example"><span class="label">Worked example</span><p>Realistic numbers, every step, interpreted.</p></div>
+    <div class="block warn"><span class="label">Careful</span><p>A common misconception, confronted.</p></div>
+
+    <!-- Derivation: one transformation per row, justification on the right. data-stepwise reveals rows one by one. -->
+    <div class="derivation" data-stepwise>
+      <div class="step"><div>$$a = b$$</div><div class="why">why this line follows</div></div>
+      <div class="step"><div>$$b = c$$</div><div class="why">rule used</div></div>
+    </div>
+
+    <!-- Interactive figure: the widget code lives in widgets.js and is registered with L.onReady(...) -->
+    <figure class="widget wide" id="w-example">
+      <svg></svg>
+      <div class="controls-row">
+        <label>parameter <input type="range" id="w-example-a" min="0" max="2" step="0.01" value="1"></label>
+        <output for="w-example-a"></output>
+      </div>
+      <figcaption>Say exactly what to try and what to notice.</figcaption>
+    </figure>
+
+    <h2><span class="num">✓</span>Check your understanding</h2>
+    <div class="check"><p>A question that tests the insight, not recall.</p>
+      <details><summary>Show answer</summary><p>Complete reasoning, including the common wrong path.</p></details></div>
+
+    <p class="roadmap">Next: what Part N+1 covers.</p>
+  </main>
+</div>
+<pre id="__errors"></pre><pre id="__selftest"></pre>
+</body>
+</html>
