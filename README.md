@@ -1,6 +1,6 @@
 # professor: a personal AI professor skill
 
-A Claude Skill that makes Claude teach technical subjects the way an exceptional human professor does: intuition before definitions, real situations before equations, complete derivations, honest analogies, realistic worked examples, and a natural whiteboard voice instead of bullet-point summaries. The teaching philosophy draws on 3Blue1Brown, StatQuest, Welch Labs, Reducible and Computerphile, and on learning-science research (concreteness fading, worked examples, retrieval practice, spacing).
+A Claude Skill that makes Claude teach technical subjects the way an exceptional human professor does. It combines StatQuest-level step-by-step depth with 3Blue1Brown-style geometric intuition. It starts from the actual problem, teaches every component (each operation, symbol and derivation step) individually before combining them, uses real visuals (matplotlib plots, Manim animations, Graphviz/Mermaid/Excalidraw diagrams), and splits big topics into complete parts instead of compressing them. The teaching philosophy draws on 3Blue1Brown, StatQuest, Welch Labs, Reducible and Computerphile, and on learning-science research (concreteness fading, worked examples, retrieval practice, spacing).
 
 ## Layout
 
@@ -9,6 +9,7 @@ professor/
 ├── SKILL.md                      core instructions (always loaded when the skill triggers)
 ├── references/                   loaded on demand (progressive disclosure)
 │   ├── voice.md                  how to sound like a teacher; AI patterns to avoid
+│   ├── visuals.md                choosing, generating and verifying plots, animations, diagrams
 │   ├── philosophy.md             teaching methodology, lesson design, ordering ideas
 │   ├── examples-guide.md         choosing real, mechanism-matched examples; example bank
 │   ├── math-teaching.md          equation protocol, derivations, shapes, pictures per area
