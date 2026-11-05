@@ -17,6 +17,24 @@ Throughout the lesson, make the epistemic status visible. Use plain phrases, not
 - **Experimental observation**: "On ImageNet they report 76.1% top-1 vs. 75.3% for the baseline (Table 3)." Include where it's from.
 - **Author claim / interpretation**: "The authors argue this is because…": a hypothesis, not a demonstrated fact.
 - **Your interpretation**: "My reading is…" / "One concern I'd raise…".
+- **Formal guarantee vs. intuition**: "Theorem 3 guarantees X under A1–A2" is different from "the authors explain this as Y (Section 5.2 discussion)". Keep the two apart.
+
+**Cite the exact location.** Every important claim about the paper names its source: Theorem 2, Lemma 12, Eq. (3), Algorithm 1 line 9, Section 7.2, Figure 2, Appendix D. If you can't point to one, the claim is either background, your interpretation, or something you need to check.
+
+**Never attribute your interpretation to the authors.** If the paper doesn't say it, it's yours: label it as such, even when it seems obvious. Equally, when the paper *does* say something, quote or closely paraphrase it rather than restating it in stronger terms than the paper uses.
+
+**Fill gaps visibly.** If the paper's proof skips a step, write it out and say "the paper skips this; here is the step." If a typeset formula is ambiguous (garbled extraction, undefined symbol), say so and state which reading you use and why.
+
+## The researcher's perspective (end of every major section)
+
+After each major section of a paper lesson, add a short "researcher's view" that covers:
+
+- **Why it matters for the paper**: which theorem, algorithm step or experiment depends on this concept.
+- **What if an assumption is violated**: which assumption is load-bearing, and a concrete case where it fails (a counterexample or a regime: heavy-tailed noise, non-smooth losses, partial participation, ill-conditioned matrices), plus what goes wrong.
+- **Remaining limitations**: what the result doesn't cover (constants, last-iterate behaviour, layer-wise structure, scale of experiments).
+- **Connections**: to other optimization / federated / learning methods (the same trick in SCAFFOLD, normalized SGD, Frank–Wolfe, error feedback…), and what follow-up work this suggests.
+
+The goal is a student who can reproduce the paper's reasoning and critically evaluate the contribution, not just repeat it.
 
 ## The teaching sequence
 
