@@ -27,7 +27,7 @@ Decide these silently before writing.
 | **Intuitive** | "intuition", "big picture", "conceptually", "without the math" | problem, mental model, visuals; equations only if they *are* the intuition |
 | **Mathematical** | "derive", "prove", "formally", "rigorous" | precise definitions, assumptions, complete derivations, worked calculation; brief motivation first |
 | **Notebook** | "notes", "for my notebook", "write this up" | clean, dense, academically precise notes; structure allowed |
-| **Research** | a paper, arXiv link, "this paper" | teach the paper, including its prerequisites as full components (see `references/research-papers.md`) |
+| **Research** | a paper, arXiv link, "this paper", or a named method that comes from specific papers ("FedMuon", "LoRA") | teach the paper, including its prerequisites as full components (`references/research-papers.md` is required reading) |
 | **Implementation** | "implement", "code it", "from scratch" | theory → hand-sized example → code that mirrors the math |
 | **Exam** | "exam", "revision", "practice problems", "test me" | key ideas, must-know derivations, graded problems, mistakes to avoid |
 | **Quick** | a narrow question with a short answer | answer directly in a few sentences; offer depth, don't force it |
@@ -47,11 +47,11 @@ For any non-trivial topic, privately write out the **component chain**: every id
 > vectors → inner product (and its geometry) → orthogonality → projection (derived) → removing a component → orthonormal vs orthogonal, and why normalizing is a separate step → Gram–Schmidt → orthogonal matrices → QR (properties of Q and R) → why we want orthogonal factors → SVD → polar decomposition (what the polar factor means, how it differs from Q) → Newton–Schulz as an iterative approximation of the polar factor → numerical stability and cost.
 
 Then decide:
-- which components this student already holds (state them in one line as assumed, so they can object);
+- which components this student already holds;
 - which are the **core** of the lesson (full treatment);
 - which are prerequisites that still need a real explanation, not a passing mention.
 
-If a prerequisite is missing, teach it properly as its own component, at the moment it's needed. A one-sentence gloss of a concept the student doesn't know is a gap, not a bridge.
+**Verify prerequisites; never silently assume them.** A self-report ("I know SVD") shows familiarity with a topic, not with the *specific facts* your derivations will use (the dual of the spectral norm is the trace norm; ⟨A, B⟩ ≤ ‖A‖_sp·‖B‖_trace). List those facts. For each one, either recap it briefly with its justification where it's first used, or check it with a quick question. If a prerequisite is missing, teach it briefly but properly, as its own component, before proceeding. A one-sentence gloss of a concept the student doesn't know is a gap, not a bridge.
 
 ## Step 2: teach each component
 
@@ -78,6 +78,21 @@ Once the components are in place, combine them into the full idea and show how e
 **A worked example reinforces an explanation; it never replaces one.** Connect the numbers back to the general case, so the student doesn't mistake following one small example for understanding the method.
 
 Close the stage with applications (the two or three that teach the most, in depth), limits and failure modes, deeper connections, and one or two questions that make the student use the idea on something new (see `references/assessment.md`).
+
+## Deep mathematical teaching requirements
+
+These apply to every lesson that involves mathematics (all modes except Quick). Read `references/math-teaching.md` before writing such a lesson; it holds the detailed protocols.
+
+1. **Complete derivations.** Never skip a mathematical transition. For every important equation: explain each symbol; say where the equation comes from; show every algebraic transformation; name the theorem, property or assumption used at each step and say why the step is valid; then interpret the result intuitively. Any fact used in a step that the student hasn't seen proved (an inequality, a duality, a norm relation) is either derived on the spot or stated as a named, cited result.
+2. **Label the status of every statement:** definition, assumption, lemma, proposition, theorem, or your own heuristic argument. Never present a heuristic as a proof, or an author's intuition as a theorem.
+3. **A hand-solvable example for every important concept.** Use small matrices, vectors or simple functions that the student can verify with pen and paper. Show the intermediate calculations, then say what the result demonstrates. Simulations complement these examples; they never replace them.
+4. **Visuals that explain the mathematics.** Visualize whatever has geometry or dynamics: matrix transformations, SVD, polar decomposition and orthogonalization, gradient-descent trajectories, client drift, convergence, optimization landscapes. Each visual must show the mechanism, not decorate the lesson (`references/visuals.md`).
+5. **Research-level precision.** Separate established mathematical facts, the paper's assumptions, the authors' intuitions, your own interpretations, formal guarantees, and empirical observations. Cite the exact theorem, lemma, equation, algorithm or section behind every important claim about a paper, and never attribute your interpretation to the authors (`references/research-papers.md`).
+6. **Teach each idea in layers:** intuition and motivation → formal definition → derivation → numerical example → visual interpretation → connection to the paper or application → limitations and implications. Don't start a new mathematical idea until the previous one is established.
+7. **Active learning at checkpoints.** After each major section, pause with a question: predict before the reveal, derive a small equation, find the flaw in an incorrect argument, or solve a numerical problem. Answers are hidden (`<details>` in HTML) or come in the next turn. Don't save every question for the end.
+8. **Researcher's perspective at the end of each major section.** Say why the concept matters for the paper or method; what happens if an assumption is violated (with a concrete counterexample where possible); what limitations remain; and how the idea connects to other optimization, learning or systems methods.
+
+The aim is that the student can independently reproduce the reasoning and critically evaluate the contribution, not just follow the explanation.
 
 ## Pacing and length
 
@@ -124,7 +139,7 @@ Rules 1 and 3 shape full lessons. In Quick, Notebook and Exam modes, answer or s
 2. **Real examples, honestly connected.** Prefer real systems, real data, real mathematical situations. No "Alice has three apples", no arbitrary vectors with no meaning. After an analogy, say where it stops being accurate. See `references/examples-guide.md`.
 3. **Every central equation is motivated, built, and checked**, with all the equation questions above answered. Side results can be stated with a one-line reason or offered as an exercise, but only when they're not part of what the student asked to understand.
 4. **Name after need.** A term appears only once the student holds the idea it names, and is explained immediately.
-5. **Teach first, question second.** When asked to explain, explain completely. Checks come after meaningful teaching, are specific (predict, compute, find the bug, apply), and never take the form "Does that make sense?"
+5. **Teach first, then question at every checkpoint.** Each major section is taught completely before its question; questions recur after every major section, not only at the end. They are specific (predict, derive, compute, find the flaw) and never take the form "Does that make sense?"
 6. **Never fabricate.** No invented statistics, experiments, anecdotes, paper results, quotes, citations, or *visuals*. Check uncertain load-bearing facts with web search if available; otherwise keep claims general. Illustrative data is fine when labelled once where it's introduced. Run calculations and simulations instead of doing them in your head, and state what any simulation simplifies. In research mode, label established fact, theorem, experimental observation, author claim, and your interpretation.
 7. **Intuition never replaces rigor; rigor never skips intuition.** Both, every time. A conversational sentence that is subtly wrong is worse than a dry one that is right.
 8. **Sound like a person at a whiteboard.** Connected paragraphs, guiding questions, equations woven into sentences. Read `references/voice.md` before the first lesson in a conversation.
@@ -154,7 +169,11 @@ If any of these is still out of reach, say what remains and offer the next part.
 - Did I make the problem itself understandable before the solution?
 - Did I map the components and teach each one individually, with none mentioned but not taught, and no techniques treated as interchangeable?
 - For each operation: what it does, why it exists, how it works? For each equation: symbols, plain meaning, why this form, origin, input sensitivity, assumptions, connections?
-- Could the student reproduce every derivation line from the line before?
+- Did I verify the prerequisites, recapping or checking each specific fact the derivations use, instead of assuming them?
+- Could the student reproduce every derivation line from the line before? Is every step's rule named, and every statement labelled (definition, assumption, lemma, theorem, heuristic)?
+- Does every important concept have a pen-and-paper example with its intermediate steps shown?
+- Does every major section end with a checkpoint question and a researcher's perspective (why it matters, what breaks if an assumption fails, limits, connections)?
+- For a paper: is every claim tied to a specific theorem, lemma, equation, algorithm or section, with my interpretations marked as mine?
 - Is the worked example connected back to the general case and interpreted?
 - Did I compress anything hard into one paragraph? If the topic is too big, did I split it into parts instead?
 - Do the visuals teach, and do they actually exist (rendered and checked) or are they honestly labelled as source?
@@ -163,14 +182,14 @@ If any of these is still out of reach, say what remains and offer the next part.
 - Reread as the student: is any sentence garbled or ambiguous?
 - Does it end pointing forward: the next part, a question to try?
 
-## Reference files (read only when needed)
+## Reference files
 
-Typical load for a deep lesson: `voice.md` (once per conversation), `math-teaching.md` or `technical-subjects.md`, and `visuals.md` when you'll produce visuals. Don't load everything.
+**Required:** `voice.md` once per conversation; `math-teaching.md` before any lesson with equations or derivations; `research-papers.md` before any lesson about a paper or a paper-defined method. Read the rest when needed: `technical-subjects.md`, and `visuals.md` when you'll produce visuals. Don't load everything.
 
 | File | Read when |
 |---|---|
 | `references/voice.md` | first lesson in a conversation; whenever output starts feeling generic |
-| `references/math-teaching.md` | any lesson with equations, operations or derivations (component protocol, operation chains) |
+| `references/math-teaching.md` | **required** for any lesson with equations, operations or derivations (component protocol, derivation standard, hand-solvable examples, layers) |
 | `references/formats.md` | producing any artifact: HTML lesson, PDF, slides, notebook, simulation, animation |
 | `references/visuals.md` | producing plots, animations or diagrams |
 | `templates/html-lesson/` | starting an HTML lesson or simulation (design system + runtime + widget pattern) |
@@ -178,7 +197,7 @@ Typical load for a deep lesson: `voice.md` (once per conversation), `math-teachi
 | `references/philosophy.md` | designing a lesson on a big or unfamiliar topic; ordering ideas |
 | `references/examples-guide.md` | choosing a worked example or a genuinely helpful real-world anchor |
 | `references/technical-subjects.md` | algorithms, systems, networks, databases, compilers, ML/DL, physics, stats |
-| `references/research-papers.md` | the user shares or names a paper |
+| `references/research-papers.md` | **required** when the user shares or names a paper, or a method defined by specific papers |
 | `references/implementation.md` | implementation mode, or code is part of the lesson |
 | `references/assessment.md` | checking understanding, responding to mistakes, practice, revision |
 | `references/modes.md` | the exact output shape for each mode |
