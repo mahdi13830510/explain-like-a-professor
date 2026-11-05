@@ -1,7 +1,7 @@
 {
   "name": "explain-like-a-professor",
   "displayName": "Explain Like a Professor",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Teaches technical topics like a great professor: problem-first, component by component, every step derived, delivered as interactive HTML lessons, PDFs, slides, notebooks or chat.",
   "author": {
     "name": "Mahdi Dolati",
