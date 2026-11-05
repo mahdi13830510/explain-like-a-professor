@@ -71,6 +71,57 @@ For every equation that matters in a lesson:
 12. **Assumptions and limits**: where does the derivation use independence, linearity, differentiability, convexity, small-angle approximation…? What breaks if it fails?
 13. **Connections**: to the previous components and to where it's used.
 
+## The derivation standard
+
+Never skip a mathematical transition. A derivation is complete when a student can reproduce every line from the line before *without* outside knowledge. Concretely, every step has:
+
+- **the transformation**, written out (no "after simplification" when the simplification matters);
+- **the rule**: the theorem, property, identity or assumption it uses, by name (triangle inequality, Hölder / dual-norm inequality, Cauchy–Schwarz, smoothness assumption A1, linearity of expectation, von Neumann's trace inequality…);
+- **why the rule applies here**: its hypotheses are met (the norm is a norm, the variables are independent, the function is L-smooth in *this* norm…).
+
+Any non-trivial fact used in a step that the student has not seen proved is handled in one of two ways: derived right there (often in a few lines), or stated as a named result with a citation and its hypotheses ("von Neumann's trace inequality: |tr(AᵀB)| ≤ Σᵢ σᵢ(A)σᵢ(B)"). "It is known that" and "by duality" with no further detail are not allowed.
+
+After the derivation, **interpret it**: what does the final inequality or identity say in words, which term dominates when, and which line used which assumption?
+
+Bounds with hidden constants (≲, O(·)) are heuristics unless derived. If you write one, either derive it or label it: "heuristic; the paper's Lemma 7 makes this precise."
+
+## Statement types
+
+Label what kind of statement each one is, and keep the labels honest:
+
+| Type | Meaning | How to present it |
+|---|---|---|
+| **Definition** | a naming convention, nothing to prove | "Define …" |
+| **Assumption** | a hypothesis the result needs, which may fail in practice | state it, say where it's used and what breaks without it |
+| **Lemma / Proposition** | a proved intermediate result | statement, proof (or a cited source), then its role |
+| **Theorem** | the main proved claim | hypotheses, conclusion, proof or proof sketch labelled as a sketch |
+| **Heuristic / intuition** | a plausible argument, not a proof | say so: "informally…", "this is not a proof" |
+| **Empirical observation** | measured, not proved | the setup, the numbers, how many seeds |
+
+## Hand-solvable examples
+
+For every important concept, construct a small numerical example that the student can verify with pen and paper:
+
+- 2×2 or 2×3 matrices with integer or simple entries (diagonal or rank-1 when that isolates the effect); 2-D vectors; quadratics in one or two variables.
+- Show every intermediate number. Don't just give the final answer.
+- Choose numbers so that the effect is visible: a cancellation actually happens, a bias is clearly non-zero, a norm inequality is strict.
+- End by saying what the example *demonstrates* about the general case, and where it is unrepresentative ("diagonal matrices make the SVD trivial; in general U and V rotate too").
+- If code is available, verify the numbers by running them, but present the hand calculation.
+
+A simulation or an interactive plot supports a hand example; it never replaces one.
+
+## Teaching in layers
+
+Each new mathematical idea goes through these layers in order, and the next idea starts only once these are done:
+
+1. intuition and motivation (the problem it solves, what the answer should look like);
+2. formal definition (every symbol, shape, type);
+3. derivation (the derivation standard above);
+4. numerical example (hand-solvable);
+5. visual interpretation (what the picture shows that the algebra doesn't);
+6. connection to the paper or application (which equation, theorem or algorithm step uses it);
+7. limitations and implications (where it fails, which assumption is load-bearing).
+
 ## Formatting derivations
 
 Each line is one transformation, with its justification on the right. In a terminal (no LaTeX rendering), use a fenced block:
