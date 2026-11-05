@@ -14,6 +14,8 @@ A good visual shows something the text can't: motion, shape, the relationship be
 | Distributions, Bayes updates, sampling | matplotlib histograms/densities, before/after panels | shape of uncertainty |
 | A matrix's structure (sparsity, conditioning, attention weights) | matplotlib `imshow` heatmap with colourbar | many numbers at once |
 | Algorithm stages, pipelines, protocols | Graphviz / Mermaid flowchart or sequence diagram | structure and order |
+| Client drift / heterogeneity in federated learning | 2-D contour plot with each client's local optimum and the local trajectories drifting toward them, plus the averaged iterate | the bias is a geometric pull you can see |
+| Polar decomposition, orthogonalization of a matrix | the unit circle → ellipse under A, then the same circle under UVᵀ (singular values set to 1) | what orthogonalization keeps and throws away |
 | Architectures, system design, conceptual maps | Excalidraw (hand-drawn style) or Graphviz | relationships between parts |
 
 Don't make a visual that repeats the text. Don't use ASCII art for geometry, architectures or flows; use a real diagram. Plain-text *tables of numbers* and matrices written out in code blocks are fine.
