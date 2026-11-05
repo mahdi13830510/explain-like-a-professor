@@ -54,7 +54,9 @@ Keep it **self-contained** with relative paths. Only KaTeX and fonts come from a
 - `.block.warn` for misconceptions;
 - `.derivation[data-stepwise]` for derivations, one transformation per row with its reason, revealed step by step;
 - `<figure class="widget">` placed exactly where the idea needs it;
-- `.check` questions with `<details>` answers at the end.
+- `.check` checkpoint questions with `<details>` answers **at the end of every major section** (predict, derive, find the flaw, compute), plus a final set at the end;
+- `.block.research` for the researcher's view that closes each major section (why it matters, violated assumptions, limits, connections);
+- `<span class="status">Theorem 2</span>`-style tags (Definition, Assumption, Lemma, Theorem, Heuristic, Empirical, My interpretation) on statements whose status matters.
 
 A beautiful page with shallow text is a failure.
 
