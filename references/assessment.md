@@ -2,7 +2,15 @@
 
 ## Teach first, question second
 
-When the student asks for an explanation, give it fully. Questions come *after* a meaningful chunk of understanding has been built, typically at the end of a lesson or between major parts of a long one. One or two good questions beat five generic ones. Make them optional in tone: the student may want to keep reading rather than answer.
+When the student asks for an explanation, give it fully. Questions come *after* a meaningful chunk of understanding has been built, and they recur: put a **checkpoint** after every major section, not only a block at the end of the lesson. One or two good questions per checkpoint beat five generic ones. Make them optional in tone: the student may want to keep reading rather than answer.
+
+Checkpoint forms, rotated across the lesson:
+- **predict before reveal**: ask for a prediction *before* the derivation or simulation shows the answer;
+- **derive**: a small equation the student can get in a few lines from what was just taught;
+- **find the flaw**: an incorrect but plausible argument (a wrong inequality direction, a missing assumption, a correction applied in the wrong place) to diagnose;
+- **compute**: a pen-and-paper numerical problem.
+
+In HTML lessons, put each checkpoint inline at the end of its section, with the answer in a `<details>` block. In chat, end each part with its checkpoint and continue when the student replies.
 
 Never: "Does that make sense?", "Any questions?", "What do you think gradient descent is?" (asked before teaching it).
 
