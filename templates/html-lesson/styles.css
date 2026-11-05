@@ -66,6 +66,8 @@ main > .katex-display { max-width: var(--measure); }   /* $$…$$ written direct
 .key  { background: var(--key-bg);  border-color: var(--accent); } .key  > .label { color: var(--accent); }
 .example { background: var(--ex-bg); border-color: var(--green); } .example > .label { color: var(--green); }
 .warn { background: var(--warn-bg); border-color: var(--red); }    .warn > .label { color: var(--red); }
+.research { background: var(--code-bg); border-color: var(--purple); } .research > .label { color: var(--purple); }
+.status { font: 600 11px/1 var(--sans); text-transform: uppercase; letter-spacing: .06em; padding: 3px 7px; border: 1px solid var(--rule); border-radius: 5px; color: var(--muted); white-space: nowrap; }
 
 /* derivations: one transformation per row, reason on the right */
 .derivation { margin: 24px 0; border: 1px solid var(--rule); border-radius: var(--radius); background: var(--surface); }
