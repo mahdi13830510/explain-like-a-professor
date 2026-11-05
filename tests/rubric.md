@@ -17,6 +17,9 @@ Each test lesson is scored 1–5 on each criterion. A lesson passes when no crit
 | 11 | **Component completeness** | Every operation and prerequisite the student lacks is taught individually (problem, picture, mechanism, formal statement, derivation, example); none merely named; distinct techniques contrasted | Operations name-dropped ("orthogonalize via Newton–Schulz"); several ideas compressed into one paragraph |
 | 12 | **Visuals that teach** | Real plots, animations or diagrams generated and verified (or honestly provided as source), each showing something the text can't | No visuals where geometry or motion is central; ASCII art standing in for diagrams; decorative or nonexistent figures |
 | 13 | **Mastery reached** | A student could explain, derive, apply, implement, and state limits; or the lesson says which part comes next | Definition + intuition + one example presented as complete |
+| 14 | **Prerequisites verified** | Specific facts used by the derivations are recapped or checked, even when the student says they know the topic | Facts like a duality or norm inequality used without proof or recap |
+| 15 | **Statement status and sources** | Definitions, assumptions, lemmas, theorems, heuristics and empirical results are labelled; paper claims cite the exact theorem/equation/section; own interpretations marked | Heuristics presented as proofs; claims about a paper without location; interpretations attributed to authors |
+| 16 | **Checkpoints and researcher's view** | Every major section ends with a checkpoint question and a researcher's view (why it matters, violated assumptions, limits, connections) | Questions only at the end; no critical perspective |
 
 Also check: a worked example with realistic numbers that is computed fully and interpreted; ends pointing forward with good check questions (not "Does that make sense?").
 
