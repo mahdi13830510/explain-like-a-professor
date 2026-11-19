@@ -35,9 +35,9 @@ Pick the best path that exists; don't install packages without the user's go-ahe
 
 **Start from the template** in `templates/html-lesson/`. Copy it to the lesson folder and fill it in:
 - `index.html` holds the lesson text, blocks and figures;
-- `styles.css` is the design system: paper/ink palette, light and dark themes, a serif reading face, sans UI, labelled teaching blocks;
-- `lesson.js` provides the runtime: TOC with scrollspy, progress bar, theme toggle, KaTeX rendering, step-by-step derivations, SVG plotting helpers, draggable handles, self-tests;
-- `widgets.js` holds this lesson's interactive figures.
+- `styles.css` is the design system: paper/ink palette, light and dark themes, a sans reading face (Inter, with JetBrains Mono for numbers), figure cards, labelled teaching blocks;
+- `lesson.js` provides the runtime: TOC with scrollspy, progress bar, theme toggle, KaTeX rendering, step-by-step derivations, SVG plotting helpers, draggable handles, self-tests, and the `F.*` figure helpers (below);
+- `widgets.js` holds this lesson's interactive figures (the template ships one small working example with a self-test).
 
 ```
 lessons/<topic-slug>/
@@ -59,6 +59,24 @@ Keep it **self-contained** with relative paths. Only KaTeX and fonts come from a
 - `<span class="status">Theorem 2</span>`-style tags (Definition, Assumption, Lemma, Theorem, Heuristic, Empirical, My interpretation) on statements whose status matters.
 
 A beautiful page with shallow text is a failure.
+
+**Visual first (v2 design).** Open each major section with a figure, aim for roughly one figure per idea, and keep the text around it short: the figure carries the idea, the prose names it and gives the reasoning.
+- **`.block.plain`** ("In plain words", amber) restates each formal result with no notation, right after the `.block.def` or theorem it explains.
+- **Define notation at first use**, in the sentence where the symbol appears. A `.eq` card (`<div class="eq">$$…$$<p class="gloss">…</p></div>`) shows a key equation with a one-line reading of it.
+- **One colour = one role per lesson.** Pick the roles once (`--blue --red --amber --purple --green --teal`, each with a `-bg` tint), declare them in a `.keyrow` under the hero, and keep them in every figure, stat tile and `.c-blue`-style coloured word. Do not reuse a colour for a second meaning.
+- **Figure card anatomy** (`<figure class="widget split">`):
+  - `.fig-stage` (add `.sq` for a square picture) holding the `<svg>`;
+  - `.fig-side` holding, in order, `.fig-kicker` ("Figure 3 · interactive"), `.fig-title`, the controls, `.stats`, and `ol.try`;
+  - controls are `.ctl` with `<label>name <output for="id"></output><input type="range" id="id">` and `.seg` segmented controls (`<div class="seg" id=…><button data-v="a" class="on">…</button></div>`, wired with `F.seg`);
+  - `.stats` holds `.stat` tiles (`<div class="stat blue"><span>label</span><b id="…">–</b><small>what it means</small></div>`). Use tiles for readouts, written with `F.set`, instead of long readout strings;
+  - `ol.try` is a short numbered list of "try this" steps; each says what to do and what to notice;
+  - a `<figcaption>` says what is drawn, what each colour is, and whether the example is real or an illustrative toy.
+- **Static diagrams:** `<figure class="static">` with an inline `<svg>` built from `.dg-box` (rounded boxes), `.dg-t` (title), `.dg-s` (subtitle) and `.dg-h` (small heading).
+- Also available: `.tablewrap` around a `<table>` (`td.n` for numbers), `.roadmap` for the lesson map, `.status` tags.
+
+**Figure helpers `F.*`** (in `lesson.js`, on top of `L.*`): `F.$` (getElementById), `F.sgn`, `F.clamp`, `F.n(v, d)` (fixed decimals, true minus sign), `F.fire(input, v)` (set a slider and fire it, for self-tests), `F.set(id, html)` (fill a stat tile), `F.rng(seed)` (deterministic random numbers), `F.seg(id, cb)` (segmented control), `F.path` / `F.poly` (polylines in data coordinates), `F.ball(P, norm, cx, cy, e, attrs)` (circle, square or diamond), `F.label` (haloed text in data coordinates), `F.handle(P, color, onMove)` (draggable ring), `F.hex` / `F.mix` (blend theme colours, e.g. for heat maps).
+
+**Multi-part lessons.** When a topic needs several pages, share one `styles.css` and one `lesson.js`, and give each part its own `partN.html` and `partN.js` (loaded after `lesson.js`; put helpers shared by several parts in a `fig.js` that loads between them). Add the `.pn` navigation in the topbar (`<span class="pn"><a href="index.html">Overview</a><a class="here" href="part1.html">Part 1</a>…</span>`) and state in each part's `.roadmap` what the other parts cover. An optional overview `index.html` can use `.partcards` (one linked card per part) and `.lanes` / `a.node` (a map of "what failed, what fixed it"). Run the checker on every part page.
 
 **Interactivity that teaches.** Every widget lets the learner change a cause and watch the effect, and its caption says what to try and what to notice. Patterns worth building:
 
@@ -95,11 +113,11 @@ Pin exact versions from a CDN (cdn.jsdelivr.net/npm/pkg@x.y.z).
 **Animations.** Show transformations *progressively* (identity → final, with easing, a replay button), not just the end state. Use `requestAnimationFrame` with `t ∈ [0,1]` interpolation, and respect `prefers-reduced-motion`. Embed rendered Manim output as `<video controls loop muted playsinline>`, only when it was actually rendered.
 
 **Design rules.**
-- Use the template's tokens; one accent colour; colour has meaning (keep "vector a = blue" consistent across text and figures).
+- Use the template's tokens; one accent colour; colour has meaning (keep "vector a = blue" consistent across text and figures; see the colour key above).
 - Generous whitespace, a ~70-character reading measure, wide figures.
-- No gradients, glassmorphism, emoji headings, card grids, or decorative animation.
+- No gradients, glassmorphism, emoji headings, or decorative animation. No card grids for content (cards are fine for navigation: `.partcards` on an overview page).
 - Every figure must read in both themes: get colours from CSS variables (`L.css("--blue")`) and redraw via `L.onTheme`.
-- Responsive: figures scale through their SVG viewBox; controls wrap; no horizontal page scroll.
+- Responsive: figures scale (wide `figure.static` diagrams scroll sideways on phones rather than shrink their text) through their SVG viewBox; controls wrap; no horizontal page scroll.
 
 **Verify before delivering.** Run the checker, read the screenshots, and fix what's wrong:
 
