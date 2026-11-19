@@ -124,7 +124,7 @@ Rules:
 
 For any non-chat format:
 1. Check the toolchain (`references/formats.md` §2).
-2. Build the lesson with the full component-by-component teaching inside it. For HTML, start from `templates/html-lesson/`, with interactive widgets placed exactly where each idea needs them.
+2. Build the lesson with the full component-by-component teaching inside it. For HTML, start from `templates/html-lesson/`: visual-first, each idea opening with an interactive figure card (controls, stat tiles, "try this" steps; see `references/formats.md` §3), placed exactly where the idea needs it.
 3. **Verify for real.** For HTML, run `python3 scripts/check_html.py <lesson>/index.html`: it checks JavaScript errors, math rendering, widget self-tests and overflow, and saves screenshots. For PDFs and slides, render pages to images. For notebooks, execute top to bottom.
 4. **Look at the output yourself** (the screenshots or page images) and fix what's wrong.
 5. Deliver the path, how to open it, and anything you couldn't render or test, stated plainly.

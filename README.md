@@ -168,7 +168,7 @@ explain-like-a-professor/
 │   ├── implementation.md        theory → code that mirrors the math
 │   ├── assessment.md            checks, mistake repair, retrieval and spacing
 │   └── modes.md                 output shape for every mode
-├── templates/html-lesson/       design system + runtime (TOC, KaTeX, step-by-step derivations, SVG plotting, self-tests)
+├── templates/html-lesson/       design system v2 + runtime (figure cards, TOC, KaTeX, step-by-step derivations, SVG plotting, figure helpers, self-tests)
 ├── scripts/check_html.py        headless-browser verification: JS errors, math, widget self-tests, overflow, screenshots
 ├── examples/                    style-calibration sessions
 ├── showcase/                    finished lessons
