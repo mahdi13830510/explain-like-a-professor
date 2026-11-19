@@ -157,6 +157,46 @@
     input.addEventListener("input", run); run(); return run; };
   L.fmt = (v, d = 4) => (Math.abs(v) >= 1e5 || (Math.abs(v) < 1e-3 && v !== 0)) ? v.toExponential(2) : (+v.toFixed(d)).toString();
 
+  /* ---------- figure helpers: window.F (used by the v2 figure cards in widgets.js) ---------- */
+  const F = (window.F = {});
+  /** document.getElementById shorthand */
+  F.$ = (id) => document.getElementById(id);
+  /** sign with a dead zone: -1, 0 or 1 */
+  F.sgn = (v) => (Math.abs(v) < 1e-12 ? 0 : v > 0 ? 1 : -1);
+  F.clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+  /** number to a fixed number of decimals, with a true minus sign and no "-0.000" */
+  F.n = (v, d = 3) => { const r = Math.abs(v) < 0.5 * Math.pow(10, -d) ? 0 : v; return r.toFixed(d).replace("-", "\u2212"); };
+  /** set a range input's value and fire its input event (for self-tests) */
+  F.fire = (el, v) => { el.value = String(v); el.dispatchEvent(new Event("input")); };
+  /** write HTML into the element with this id (stat tiles, readouts); silently ignores a missing id */
+  F.set = (id, html) => { const e = F.$(id); if (e) e.innerHTML = html; };
+  /** deterministic random numbers (mulberry32): const r = F.rng(7); r() is in [0, 1) */
+  F.rng = (s) => () => { s |= 0; s = (s + 0x6D2B79F5) | 0; let t = Math.imul(s ^ (s >>> 15), 1 | s); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  /** Segmented control: <div class="seg" id=...><button data-v="a" class="on">..</button>..</div>. Returns the initial value; box._pick(v, quiet) selects one. */
+  F.seg = (id, cb) => { const box = F.$(id), btns = [...box.querySelectorAll("button")];
+    const pick = (v, quiet) => { btns.forEach((b) => b.classList.toggle("on", b.dataset.v === v)); if (!quiet) cb(v); };
+    btns.forEach((b) => b.addEventListener("click", () => pick(b.dataset.v))); box._pick = pick;
+    return (btns.find((b) => b.classList.contains("on")) || btns[0]).dataset.v; };
+  /** SVG path "d" string through data points [[x, y], ...] using a plot P's X/Y maps (close = true appends Z) */
+  F.path = (P, pts, close) => pts.map((p, i) => (i ? "L" : "M") + P.X(p[0]).toFixed(1) + "," + P.Y(p[1]).toFixed(1)).join("") + (close ? "Z" : "");
+  /** a styled polyline / polygon through data points */
+  F.poly = (P, pts, attrs, parent) => L.el("path", Object.assign({ d: F.path(P, pts, attrs && attrs.close), fill: "none", "stroke-width": 2.2, "stroke-linejoin": "round", "stroke-linecap": "round" }, attrs || {}), parent);
+  /** ball of radius e around (cx, cy) in data coordinates: norm "inf" = square, "1" = diamond, anything else = circle */
+  F.ball = (P, norm, cx, cy, e, attrs, parent) => {
+    if (norm === "inf") return L.el("rect", Object.assign({ x: P.X(cx - e), y: P.Y(cy + e), width: P.X(cx + e) - P.X(cx - e), height: P.Y(cy - e) - P.Y(cy + e) }, attrs), parent);
+    if (norm === "1") return L.el("path", Object.assign({ d: F.path(P, [[cx + e, cy], [cx, cy + e], [cx - e, cy], [cx, cy - e]], true) }, attrs), parent);
+    return L.el("ellipse", Object.assign({ cx: P.X(cx), cy: P.Y(cy), rx: Math.abs(P.X(cx + e) - P.X(cx)), ry: Math.abs(P.Y(cy) - P.Y(cy + e)) }, attrs), parent);
+  };
+  /** text label at data coordinates (outlined in the page colour so it stays readable over lines) */
+  F.label = (P, x, y, s, color, parent, anchor) => { const t = L.el("text", { x: P.X(x), y: P.Y(y), class: "svg-lab", fill: color || L.css("--ink"), "text-anchor": anchor || "start" }, parent); t.textContent = s; return t; };
+  /** a draggable ring on top of the plot; h.place(x, y, color) moves it; onMove(x, y) is called while dragging */
+  F.handle = (P, color, onMove) => { const h = L.el("circle", { r: 12, fill: "transparent", stroke: color, "stroke-width": 3 }, P.svg);
+    P.drag(h, onMove); h.place = (x, y, col) => { h.setAttribute("cx", P.X(x)); h.setAttribute("cy", P.Y(y)); if (col) h.setAttribute("stroke", col); }; return h; };
+  /** CSS colour ("#rgb", "#rrggbb" or "rgb(...)") to [r, g, b] */
+  F.hex = (c) => { c = c.trim(); if (c[0] === "#") { if (c.length === 4) c = "#" + [...c.slice(1)].map((x) => x + x).join(""); return [1, 3, 5].map((i) => parseInt(c.slice(i, i + 2), 16)); } return (c.match(/[\d.]+/g) || [0, 0, 0]).slice(0, 3).map(Number); };
+  /** blend two [r, g, b] colours: t = 0 gives a, t = 1 gives b; returns an "rgb(...)" string */
+  F.mix = (a, b, t) => `rgb(${a.map((v, i) => Math.round(v + (b[i] - v) * t)).join(",")})`;
+
   /* ---------- self-tests: L.test(name, fn) — fn throws or returns false on failure ---------- */
   const tests = [];
   L.test = (name, fn) => tests.push([name, fn]);
