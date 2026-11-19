@@ -13,7 +13,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <!-- Fonts: optional; the system fallbacks in styles.css look fine offline. -->
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
 <!-- KaTeX (pinned). For offline use, download the katex@0.16.11 dist folder into assets/katex/ and point these three tags there. -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
@@ -26,6 +26,8 @@
 <div id="progress"></div>
 <div class="topbar">
   <span class="course">COURSE / SERIES NAME · Part N</span><span class="spacer"></span>
+  <!-- Optional part navigation for multi-part lessons: delete this span for a single page. Point each href at the real part file (partN.html); mark the current page with class="here". -->
+  <span class="pn"><a href="#">Overview</a><a class="here" href="#">Part 1</a><a href="#">Part 2</a></span>
   <button class="icon-btn" id="theme-toggle" aria-label="Toggle dark mode">◐ Theme</button>
 </div>
 
@@ -37,39 +39,86 @@
       <div class="kicker">KICKER (e.g. Calculus · Part 1 of 3)</div>
       <h1>LESSON TITLE</h1>
       <p class="lede">The problem this lesson solves, in one or two sentences.</p>
-      <p class="roadmap">Roadmap: what this part covers, what comes next, and what is assumed.</p>
     </header>
 
-    <!-- ===== One <h2> per major component. Prose carries the reasoning; blocks label roles. ===== -->
-    <h2><span class="num">1</span>THE PROBLEM</h2>
-    <p>Make the problem itself understandable before any solution…</p>
+    <!-- Colour key: one colour = one role for the whole lesson. Declare the roles once here, keep them in every figure. -->
+    <div class="keyrow" aria-label="Colour key">
+      <span><i style="background:var(--blue)"></i>ROLE OF BLUE (e.g. the input)</span>
+      <span><i style="background:var(--red)"></i>ROLE OF RED (e.g. the change or the error)</span>
+      <span><i style="background:var(--amber)"></i>ROLE OF AMBER (e.g. the slope)</span>
+      <span><i style="background:var(--green)"></i>ROLE OF GREEN (e.g. results, "still fine")</span>
+    </div>
+    <p class="roadmap">Roadmap: what this part covers, what comes next, what is assumed, and where the material comes from (mark anything that is your own addition).</p>
 
+    <!-- ===== One <h2> per major component. Open each section with a figure; keep the text around it short. ===== -->
+    <h2><span class="num">1</span>THE PROBLEM</h2>
+    <p>One or two sentences that make the problem visible, then the figure. Define every symbol at first use: $f(x)$ is …</p>
+
+    <!-- Interactive figure card. Code lives in widgets.js (L.onReady). Left: the picture. Right: title, controls, stat tiles, steps to try. -->
+    <figure class="widget split" id="w-example">
+      <div class="fig-stage sq"><svg></svg></div>
+      <div class="fig-side">
+        <div class="fig-kicker">Figure 1 · interactive</div>
+        <div class="fig-title">FIGURE TITLE: the one idea it shows</div>
+        <div class="ctl"><label>PARAMETER NAME a <output for="w-a"></output><input type="range" id="w-a" min="0.2" max="2" step="0.01" value="1"></label></div>
+        <div class="seg" id="w-mode" role="group" aria-label="Function"><button data-v="sq" class="on">x²</button><button data-v="cube">x³</button></div>
+        <div class="stats">
+          <div class="stat blue"><span>VALUE f(x)</span><b id="w-fx">–</b><small>WHAT THIS NUMBER MEANS</small></div>
+          <div class="stat amber"><span>SLOPE f′(x)</span><b id="w-slope">–</b><small>WHAT THIS NUMBER MEANS</small></div>
+        </div>
+        <ol class="try">
+          <li>WHAT TO DO (e.g. drag the point to x = 0), and what you should notice.</li>
+          <li>ONE MORE ACTION, then what changes and why.</li>
+        </ol>
+      </div>
+      <figcaption>Say what is drawn, what each colour is, and whether it is a real example or an illustrative toy.</figcaption>
+    </figure>
+
+    <!-- Teaching blocks: formal statement, then the same thing in plain words. -->
     <div class="block def"><span class="label">Definition</span><p>Formal statement with every symbol explained: $f'(x)$ …</p></div>
+    <div class="block plain"><span class="label">In plain words</span><p>The same statement with no notation, as you would say it at a whiteboard.</p></div>
     <div class="block key"><span class="label">Key idea</span><p>The one sentence to remember.</p></div>
     <div class="block example"><span class="label">Worked example</span><p>Realistic numbers, every step, interpreted.</p></div>
     <div class="block warn"><span class="label">Careful</span><p>A common misconception, confronted.</p></div>
     <p><span class="status">Theorem 2</span> Label the status of statements: Definition, Assumption, Lemma, Theorem, Heuristic, Empirical, My interpretation.</p>
 
-    <!-- End of every major section: a checkpoint, then the researcher's view. -->
-    <div class="check"><p>Checkpoint: predict / derive / find the flaw / compute.</p>
-      <details><summary>Show answer</summary><p>Full reasoning.</p></details></div>
-    <div class="block research"><span class="label">Researcher's view</span><p>Why this matters for the paper; what breaks if an assumption fails; remaining limits; connections to other methods.</p></div>
+    <!-- Display equation card with a one-line gloss -->
+    <div class="eq">$$f'(x)=\lim_{h\to0}\frac{f(x+h)-f(x)}{h}$$
+      <p class="gloss">Read it aloud: what each part is, and which colour it has in the figures.</p></div>
 
+    <h3>A SUB-IDEA</h3>
     <!-- Derivation: one transformation per row, justification on the right. data-stepwise reveals rows one by one. -->
     <div class="derivation" data-stepwise>
       <div class="step"><div>$$a = b$$</div><div class="why">why this line follows</div></div>
       <div class="step"><div>$$b = c$$</div><div class="why">rule used</div></div>
+      <div class="step"><div>$$\text{so } a = c$$</div><div class="why">transitivity</div></div>
     </div>
 
-    <!-- Interactive figure: the widget code lives in widgets.js and is registered with L.onReady(...) -->
-    <figure class="widget wide" id="w-example">
-      <svg></svg>
-      <div class="controls-row">
-        <label>parameter <input type="range" id="w-example-a" min="0" max="2" step="0.01" value="1"></label>
-        <output for="w-example-a"></output>
-      </div>
-      <figcaption>Say exactly what to try and what to notice.</figcaption>
+    <!-- Static figure: a diagram that does not move. Build it from .dg-box / .dg-t / .dg-s / .dg-h and the colour tokens. -->
+    <figure class="static">
+      <svg viewBox="0 0 720 150" role="img" aria-label="DESCRIBE THE DIAGRAM">
+        <defs><marker id="dg-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--faint)"/></marker></defs>
+        <text class="dg-h" x="24" y="24">PIPELINE</text>
+        <rect class="dg-box" x="24" y="40" width="190" height="80" rx="12"/><text class="dg-t" x="119" y="76" text-anchor="middle">STEP ONE</text><text class="dg-s" x="119" y="98" text-anchor="middle">what goes in</text>
+        <rect class="dg-box" x="265" y="40" width="190" height="80" rx="12" style="stroke:var(--blue)"/><text class="dg-t" x="360" y="76" text-anchor="middle">STEP TWO</text><text class="dg-s" x="360" y="98" text-anchor="middle">what it does</text>
+        <rect class="dg-box" x="506" y="40" width="190" height="80" rx="12" style="stroke:var(--green)"/><text class="dg-t" x="601" y="76" text-anchor="middle">STEP THREE</text><text class="dg-s" x="601" y="98" text-anchor="middle">what comes out</text>
+        <line x1="216" y1="80" x2="262" y2="80" stroke="var(--faint)" stroke-width="2" marker-end="url(#dg-arrow)"/>
+        <line x1="457" y1="80" x2="503" y2="80" stroke="var(--faint)" stroke-width="2" marker-end="url(#dg-arrow)"/>
+      </svg>
+      <figcaption>One sentence on what the diagram shows.</figcaption>
     </figure>
+
+    <!-- Table -->
+    <div class="tablewrap"><table>
+      <thead><tr><th>CASE</th><th class="n">VALUE</th><th>WHAT IT MEANS</th></tr></thead>
+      <tbody><tr><td>ROW LABEL</td><td class="n">0.00</td><td>Interpretation.</td></tr>
+             <tr><td>ROW LABEL</td><td class="n">1.00</td><td>Interpretation.</td></tr></tbody>
+    </table></div>
+
+    <!-- End of every major section: a checkpoint, then the researcher's view. -->
+    <div class="check"><p>Checkpoint: predict / derive / find the flaw / compute.</p>
+      <details><summary>Show answer</summary><p>Full reasoning.</p></details></div>
+    <div class="block research"><span class="label">Researcher's view</span><p>Why this matters for the paper; what breaks if an assumption fails; remaining limits; connections to other methods.</p></div>
 
     <h2><span class="num">✓</span>Check your understanding</h2>
     <div class="check"><p>A question that tests the insight, not recall.</p>
